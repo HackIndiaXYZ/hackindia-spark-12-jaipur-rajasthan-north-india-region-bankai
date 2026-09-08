@@ -5,6 +5,11 @@ from app.schemas.network import NetworkTopologySchema, NetworkStatusSchema, Netw
 from app.schemas.reading import SensorReadingSchema, SensorReadingCreate
 from app.schemas.simulation import SimulationScenarioRequest, SimulationStatusSchema, ScenarioType, FaultType
 from app.schemas.anomaly import AnomalyResultSchema
+from app.schemas.observability import (
+    SegmentObservabilitySchema,
+    NetworkObservabilitySummarySchema,
+    VirtualSensorCandidateSchema
+)
 
 __all__ = [
     "ZoneSchema",
@@ -22,5 +27,8 @@ __all__ = [
     "SimulationStatusSchema",
     "ScenarioType",
     "FaultType",
-    "AnomalyResultSchema"
+    "AnomalyResultSchema",
+    "SegmentObservabilitySchema",
+    "NetworkObservabilitySummarySchema",
+    "VirtualSensorCandidateSchema"
 ]
