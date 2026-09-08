@@ -2,30 +2,42 @@
 
 ### AI-Powered Water Network Intelligence & Resilience
 
-> **"See the Network. Detect the Incident. Understand the Risk."**
+> **AquaSentinel is not just a leak detector. It is a water-network intelligence and resilience platform that evaluates both incidents and the observability of the system detecting them.**
 
-AquaSentinel is an AI-powered water-network intelligence and resilience platform designed to monitor simulated network telemetry, detect anomalous hydraulic behavior, evaluate network observability, identify monitoring blind spots, localize suspected pipeline incidents, estimate model-derived water loss, manage incidents through their lifecycle, and provide AI-assisted explanations and operator guidance.
+> *"See the Network. Detect the Incident. Understand the Risk."*
 
-Water distribution networks are critical infrastructure, yet municipal operators often lack full visibility into spatial network behavior. Transient pressure drops, gradual flow leaks, sensor calibration drift, and severe pipe bursts present distinct operational signatures that traditional threshold alarms fail to differentiate. AquaSentinel addresses this challenge by combining statistical anomaly detection with topology-aware graph reasoning and network observability analysis.
+---
 
-*Note: The current implementation of AquaSentinel is a software-based prototype and intelligence platform utilizing a synthetic 10-node water distribution network, model-derived hydraulic loss estimation, offline regional government telemetry, and server-side grounded AI explainability.*
+## ⚡ Executive Summary (Judge Quick View)
+
+| What | Why | Differentiator | Live Demo |
+| :--- | :--- | :--- | :--- |
+| **Full-Stack Water Network Intelligence Platform** combining synthetic IoT simulation, statistical anomaly detection, graph localization, loss estimation, government context, and Gemini AI. | Traditional SCADA alerts produce high false alarms and lack spatial network context to distinguish pipe leaks from sensor faults. | **"Monitor the Network. Monitor the Monitoring."** Evaluates simulated network observability, blind spots, and candidate virtual sensor placement. | **5 Repeatable Scenarios**: Normal, Gradual Leak (B2-B3), Sensor Fault (B3), Sudden Burst, Multi-Anomaly. |
+
+AquaSentinel is an infrastructure intelligence platform designed to monitor simulated water distribution networks, detect anomalous hydraulic behavior, evaluate network observability, identify monitoring blind spots, localize suspected pipeline incidents, estimate model-derived water loss, track incident lifecycles, and provide server-side grounded AI explainability for utility operators.
+
+*Note: AquaSentinel is a software prototype and intelligence platform utilizing a synthetic 10-node water distribution network, model-derived hydraulic loss estimation, offline regional government telemetry, and server-side grounded AI reasoning.*
 
 ---
 
 ## 💡 Why AquaSentinel?
 
-Water-network anomalies are not all the same. An abnormal sensor signal can represent a developing pipeline leak, a catastrophic pipe burst, an isolated sensor transducer fault, or simply inadequate monitoring coverage in a complex sub-zone.
+Water-network anomalies are not all the same. An abnormal sensor reading can represent:
+- a developing pipeline leak
+- a catastrophic pipe burst
+- an isolated sensor transducer fault
+- inadequate monitoring coverage in a sub-zone
 
-AquaSentinel combines anomaly detection with topology-aware reasoning and observability analysis so the system can answer not only:
+AquaSentinel combines statistical anomaly detection with topology-aware graph reasoning and observability analysis so the system asks not only:
 
 > **"Is something abnormal?"**
 
 ...but also:
 
 - **"Where is it likely happening?"** (Graph-based spatial localization across pipeline segments)
-- **"How observable is that part of the network?"** (Quantified simulated observability scoring)
+- **"How observable is that part of the network?"** (Quantified simulated observability index)
 - **"How much impact is estimated?"** (Model-derived flow loss rate in LPM and accumulated volume loss in Liters)
-- **"Is this a network incident or an isolated sensor problem?"** (Spatial neighbor correlation to prevent false leak alarms)
+- **"Is this a network incident or an isolated sensor problem?"** (Spatial neighbor agreement to prevent false leak alarms)
 - **"What evidence supports the conclusion?"** (Grounded multi-signal evidence and AI-assisted operator guidance)
 
 ---
@@ -34,158 +46,196 @@ AquaSentinel combines anomaly detection with topology-aware reasoning and observ
 
 ### Network Observability & Blind-Spot Intelligence
 
-A water network may contain healthy sensors and still suffer from weak spatial observability. AquaSentinel goes beyond point anomaly detection by evaluating **simulated network observability** across pipeline segments, identifying sub-zones with weaker sensor coverage, and evaluating candidate virtual sensor placements for simulated coverage improvement.
+A water network may contain healthy sensors and still suffer from weak spatial observability. AquaSentinel evaluates **simulated network observability** across pipeline segments, identifies sub-zones with lower sensor response coverage, and evaluates candidate virtual sensor placements for potential coverage improvement.
 
-AquaSentinel evaluates:
-- **Simulated Observability Scores**: Segment-level observability calculated from topology distance, sensor responsiveness, and network redundancy.
-- **Candidate Sensor Placements**: Algorithmic evaluation of potential virtual sensor locations to improve network coverage.
+- **Simulated Observability Score**: Segment-level index calculated from topology distance, sensor responsiveness, and network redundancy.
 - **Monitoring Blind Spots**: Clear visual highlighting of sub-zones where detection delay or spatial coverage is sub-optimal.
+- **Candidate Sensor Placement**: Algorithmic evaluation of potential virtual sensor locations to improve simulated network coverage.
 
 > **"Monitor the Network. Monitor the Monitoring."**
 
 ---
 
-## 🚀 Key Capabilities
+## ⚙️ Technical Pipeline Details
 
-| Capability | Description |
-| :--- | :--- |
-| **Synthetic Telemetry Simulation** | Generates realistic time-series pressure/flow behavior with diurnal demand curves, noise, drift, leaks, bursts, and faults. |
-| **Statistical Anomaly Detection** | Detects unusual pressure drops, flow discrepancies, and transient spikes using rolling Z-scores and Isolation Forest models. |
-| **Sensor Fault Distinction** | Distinguishes isolated single-sensor anomalies from correlated spatial network incidents, preventing false leak alarms. |
-| **Network Observability** | Quantifies simulated detection and response coverage across all 10 canonical pipeline segments. |
-| **Blind-Spot Intelligence** | Identifies lower-observability areas and evaluates candidate virtual sensor placements to boost network coverage. |
-| **Topology-Aware Localization** | Uses NetworkX graph structure and spatial sensor correlation to localize suspected leaks to specific pipeline segments. |
-| **Water-Loss Estimation** | Computes model-derived simulated flow loss rates (LPM) and accumulated volume loss (Liters). |
-| **Incident Persistence Lifecycle** | Tracks and persists pipeline incidents through a strict lifecycle state machine (`OPEN` ➔ `ACKNOWLEDGED` ➔ `RESOLVED`). |
-| **Government Data Context** | Integrates offline Rajasthan surface water telemetry (rainfall, reservoir, canal) as descriptive regional context and baseline calibration. |
-| **Grounded Gemini AI Analysis** | Employs server-side Google Gemini 2.5 Flash to generate grounded incident summaries, evidence explanations, and operator action steps. |
-
----
-
-## 🔄 How It Works
+AquaSentinel processes simulated sensor telemetry through a multi-stage deterministic and explainable intelligence pipeline:
 
 ```text
-               +----------------------------------+
-               |  Synthetic / Replayed Telemetry  |
-               +----------------------------------+
-                                |
-                                v
-               +----------------------------------+
-               |    Anomaly Detection Engine      |
-               | (Z-Score + Spatial Discrepancy)  |
-               +----------------------------------+
-                                |
-                                v
-               +----------------------------------+
-               | Network Observability Evaluation |
-               |   (Segment Coverage & Scoring)   |
-               +----------------------------------+
-                                |
-                                v
-               +----------------------------------+
-               |   Topology-Aware Localization    |
-               | (Graph Reasoning & Neighbor Check)|
-               +----------------------------------+
-                                |
-                                v
-               +----------------------------------+
-               |   Water Loss Estimation Engine   |
-               | (Model-Derived Flow & Vol Loss)  |
-               +----------------------------------+
-                                |
-                                v
-               +----------------------------------+
-               |  Incident Classification & DB    |
-               |   (Idempotent Fingerprinting)    |
-               +----------------------------------+
-                                |
-                                v
-               +----------------------------------+
-               |  Grounded Gemini 2.5 Flash AI    |
-               |  (Server-Side Evidence Explainer)|
-               +----------------------------------+
-                                |
-                                v
-               +----------------------------------+
-               |    Operator Control Console      |
-               | (Lifecycle Action & Investigation)|
-               +----------------------------------+
+Synthetic / Replayed Telemetry
+            ↓
+     Anomaly Detection  (Rolling Z-Score, Rate-of-Change, Isolation Forest)
+            ↓
+   Network Observability (Simulated Observability Score & Blind Spots)
+            ↓
+Topology-Aware Localization (NetworkX Spatial Graph Reasoning)
+            ↓
+      Loss Estimation   (Model-Derived Flow LPM & Accumulated Volume)
+            ↓
+   Incident Classification (LEAK_SUSPECTED, SENSOR_FAULT, BURST_EVENT)
+            ↓
+     Incident Persistence (Idempotent SHA-256 Fingerprinting & DB Lifecycle)
+            ↓
+     Gemini AI Analysis (Server-Side Grounded Evidence Interpretation)
+            ↓
+   Operator Console     (Lifecycle State Machine: OPEN ➔ ACK ➔ RESOLVED)
 ```
+
+### 1. Anomaly Detection
+- **Baseline Behavior**: Tracks expected diurnal pressure (2.4–2.5 bar) and flow (200 LPM) patterns.
+- **Rolling Statistics & Z-Scores**: Evaluates short-term rolling mean and standard deviation to flag statistical deviations ($|Z| \ge 2.5$).
+- **Rate-of-Change & Persistence**: Monitors rapid pressure drop rate ($\Delta P / \Delta t$) and temporal persistence over consecutive intervals.
+- **Multivariate Signals & Neighbor Comparison**: Compares pressure drops and flow discrepancies against neighboring nodes across the network graph.
+- *Implementation Note*: Uses rolling statistical Z-scores and scikit-learn Isolation Forest as an ensemble anomaly detector over simulated telemetry.
+
+### 2. Network Observability
+- **Observability Score**: Combines sensor response ratio, spatial graph distance, detection latency, and anomaly signal strength into a normalized index ($0.0$ to $1.0$).
+- *State Clearly*: **Model-derived simulated index.**
+
+### 3. Topology-Aware Localization
+- Analyzes spatial relationships between responsive sensors using NetworkX graph traversal.
+- Scores candidate pipeline segments based on direct connectivity, directional head loss, and path alignment.
+- *Important*: Does **not** imply exact real-world physical hydraulic localization.
+
+### 4. Water-Loss Estimation
+- **Flow Loss Rate**: Derived from observed vs expected simulated flow ($\Delta Q = Q_{\text{observed}} - Q_{\text{expected}}$).
+- **Accumulated Volume**: Calculated as flow loss rate $\times$ duration ($\text{Volume} = \text{Flow Loss LPM} \times \text{Elapsed Minutes}$).
+- *Clearly Labeled*: **Model-derived simulation estimate.**
+
+### 5. Incident Persistence & Management
+- Enforces strict lifecycle state machine: `OPEN` ➔ `ACKNOWLEDGED` ➔ `RESOLVED`.
+- **Idempotent Deduplication**: Uses deterministic SHA-256 fingerprinting over reading timestamps, segment IDs, and anomaly signatures to prevent duplicate database rows.
+
+### 6. Grounded AI Analysis
+- Google Gemini 2.5 Flash receives structured, pre-computed AquaSentinel incident facts and generates: `summary`, `why_detected`, `recommended_actions`, `confidence_note`, `limitations`.
+- *Core Principle*: Gemini is an **explainability layer**; it does **not** replace core deterministic anomaly detection or localization algorithms.
 
 ---
 
-## 🏛️ System Architecture
+## 🎯 Signature Hackathon Demonstrations
+
+### Demo 1 — Gradual Leak (Segment B2-B3)
+- **Flow**: Normal Network ➔ Gradual anomaly develops on segment `B2-B3` ➔ Pipeline edge `B2-B3` pulses red on SVG map ➔ Incident `INC-66964E0E` appears ➔ Operator opens detail view ➔ Multi-signal evidence displayed ➔ Model-derived loss estimated (**~30.94 LPM / 1082 L**, **87.9% confidence**) ➔ Operator requests Gemini AI explanation ➔ Operator clicks **Acknowledge** ➔ Operator clicks **Resolve**.
+
+### Demo 2 — Sensor Fault / False Alarm Prevention (*Critical Test*)
+- **Flow**: Sensor `B3` exhibits erratic pressure spikes (+2.8 bar), while neighboring sensors `B2` and `B4` remain normal.
+- **UI Behavior**: Highlights sensor `B3` in yellow/amber ➔ Leaves nearby pipeline edges `B2-B3` and `B3-B4` **cyan/healthy** ➔ Classifies event as `SENSOR_FAULT` ➔ Zero estimated water loss.
+- **Takeaway**: **"Not every anomaly is a leak."** Prevents expensive false alarm field dispatches.
+
+### Demo 3 — Network Observability & Blind-Spot Intelligence
+- **Flow**: Operator opens `/network` ➔ Views simulated segment observability scores ➔ Identifies weakest coverage areas ➔ Evaluates candidate virtual sensor placements for simulated coverage improvement.
+
+---
+
+## 🌐 Canonical Network Topology
+
+AquaSentinel models a canonical 10-sensor, 10-segment water distribution network reflected identically in both FastAPI backend and Next.js SVG frontend:
 
 ```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                       NEXT.JS 16 FRONTEND CONTROL ROOM                       │
-│  - App Shell & Scenario Controller                                          │
-│  - Interactive SVG Topology Map (10 Sensors / 10 Segments)                  │
-│  - Real-Time Telemetry Gauges & Historical Recharts Charts                  │
-│  - Incident Management Table & Detail View                                  │
-│  - AI Incident Analysis & Operator Guidance Panel                           │
-│  - Rajasthan Government Data Context Viewer                                 │
-└─────────────────────────────────────┬───────────────────────────────────────┘
-                                      │ REST API Calls (HTTP / JSON)
-                                      v
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           FASTAPI BACKEND SERVICE                           │
-│  - REST API Routes (/api/incidents, /api/network, /api/data-sources)       │
-│  - Domain Models (Zone, Pipeline, Sensor, Reading, Anomaly, Incident)       │
-│  - Anomaly Detector (Rolling Z-Score & Isolation Forest)                    │
-│  - NetworkX Graph Topology Engine & Leak Localizer                          │
-│  - Model-Derived Water Loss Estimator (LPM & Volume)                        │
-│  - Observability & Virtual Sensor Placement Engine                          │
-│  - SQLite Database & SQLAlchemy ORM Repository                              │
-│  - Government Data CSV Loaders (Rajasthan Surface Water Datasets)          │
-│  - Server-Side Gemini AI Service (google-genai SDK + Fallback)               │
-└─────────────────────────────────────┬───────────────────────────────────────┘
-                                      │ Google GenAI API (Server-Side Only)
-                                      v
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         GOOGLE GEMINI 2.5 FLASH AI                          │
-│  - Grounded Evidence Interpretation & Operator Decision Support             │
-│  - Enforced Pydantic JSON Schema Validation (AIAnalysisResult)              │
-└─────────────────────────────────────────────────────────────────────────────┘
+                        [ Reservoir R0 ]
+                               |
+         +---------------------+---------------------+
+         |                     |                     |
+      [  A1  ]              [  B1  ]              [  C1  ]
+         |                     |                     |
+      [  A2  ]              [  B2  ]              [  C2  ]
+         |                     |                     |
+      [  A3  ]              [  B3  ]              [  C3  ]
+                               |
+                            [  B4  ]
 ```
 
----
-
-## 🧪 Interactive Demo Scenarios
-
-AquaSentinel features 5 built-in, repeatable scenario presets for demonstration and verification:
-
-1. **Scenario A: Normal Operation**
-   - Baseline pressure (2.4–2.5 bar) and flow (200 LPM) across all 3 zones.
-   - All 10 sensors report healthy status; network state is `HEALTHY`; zero active leaks.
-2. **Scenario B: Gradual Leak (Segment B2-B3)**
-   - Developing leak on segment `B2-B3` in Zone B.
-   - Pipeline edge `B2-B3` pulses red on the topology map; flow loss rate ~32 LPM; incident classified as `LEAK_SUSPECTED`.
-3. **Scenario C: Sudden Burst (Zone B)**
-   - Catastrophic pressure drop (-1.45 bar in <2 min) across responsive sensors `B1`–`B4`.
-   - Rapid detection delay; flow loss rate ~78 LPM; incident classified as `BURST_EVENT` with `CRITICAL` severity.
-4. **Scenario D: Sensor Fault (Sensor B3) — *Critical Acceptance Test***
-   - Sensor `B3` exhibits erratic pressure spikes (+2.8 bar), while neighboring sensors `B2` and `B4` remain normal.
-   - Spatial correlation identifies zero network leak propagation; pipeline segments `B2-B3` and `B3-B4` remain **NORMAL** (cyan).
-   - **False alarm prevented**: No false leak incident is declared on the pipeline network.
-5. **Scenario E: Multiple Anomalies**
-   - Concurrent anomalies across Zone A and Zone B evaluating multi-branch spatial isolation stability.
+- **10 Sensors**: `A1`, `A2`, `A3`, `B1`, `B2`, `B3`, `B4`, `C1`, `C2`, `C3`
+- **10 Pipeline Segments**: `R-A1`, `R-B1`, `R-C1`, `A1-A2`, `A2-A3`, `B1-B2`, `B2-B3`, `B3-B4`, `C1-C2`, `C2-C3`
+- **3 Sub-Zones**: Zone A (Commercial), Zone B (Residential), Zone C (Industrial)
 
 ---
 
-## 💻 Technology Stack
+## 🏛️ Government Data Context Layer
 
-### Backend
-- **Core Framework**: Python 3.14 / 3.11+, FastAPI, Pydantic v2, Pydantic-Settings
-- **Graph Topology & Analytics**: NetworkX, NumPy, SciPy, scikit-learn
-- **Database & Persistence**: SQLAlchemy 2.0, SQLite
-- **AI / LLM Integration**: Official `google-genai` Python SDK (`gemini-2.5-flash`)
-- **Testing & Quality**: Pytest, Pytest-Asyncio, HTTPX
+AquaSentinel integrates local surface water telemetry datasets from Rajasthan, India (sourced from National Water Data Portals / India WRIS) as offline contextual and calibration sources:
 
-### Frontend
-- **Framework**: Next.js 16 (App Router, Turbopack), React 19, TypeScript
-- **Styling & UI**: Tailwind CSS, Lucide Icons, Glassmorphic Modern Dark Mode Design System
-- **Data Visualization**: Recharts, SVG Network Graph Visualization
+1. **Rajasthan Surface Water Telemetry Hourly Rainfall** (`rainfall_telemetry`)
+2. **Mahi Head Regulator Canal Telemetry Hourly Discharge** (`canal_telemetry`)
+3. **Bisalpur Dam Reservoir Telemetry Hourly Discharge** (`reservoir_telemetry`)
+
+### Key Principles:
+- **Read-only & Offline-first**: Data is parsed locally from bundled CSV files without external HTTP/API runtime dependencies.
+- **Provenance Preserved**: Retains dataset metadata, agency attribution (*Rajasthan Surface Water Department*), and historical observation ranges.
+- **Zero-Value Integrity**: Zero-valued discharge/rainfall observations in raw source CSVs are preserved rather than fabricated.
+- *CRITICAL STATEMENT*: **"These datasets do not directly measure AquaSentinel pipeline leaks."** They provide descriptive regional environmental context (e.g. ambient rainfall or reservoir levels) for baseline calibration.
+
+---
+
+## 🤖 AI-Assisted Analysis & Gemini Integration
+
+```text
+Structured Incident Facts ➔ AI Analysis Service ➔ Gemini 2.5 Flash ➔ Validated Output ➔ Frontend UI
+```
+
+- **Server-Side Security**: `GEMINI_API_KEY` is managed strictly in `backend/.env` and is **never** exposed to browser JavaScript or client code.
+- **Structured Pydantic Validation**: Uses `google-genai` Python SDK with `response_schema=AIAnalysisResult` to enforce strict JSON structure.
+- **Safe Deterministic Fallback**: If Gemini is unavailable or missing an API key, the system returns a grounded, evidence-based deterministic fallback (`provider: "deterministic_fallback"`). *The fallback is explicitly labeled and never claimed to be AI-generated.*
+- **Performance Caching**: In-memory cache keyed by `incident_id` prevents duplicate API requests.
+- **Explicit Triggering**: AI analysis is triggered explicitly when requested by an operator in incident detail view; **no continuous background Gemini polling**.
+
+---
+
+## 🏗️ System Architecture
+
+```text
+ ┌────────────────────────────────────────────────────────┐
+ │                Government Data Context                 │
+ │            Rajasthan Surface Water / NWDP             │
+ └───────────────────────────┬────────────────────────────┘
+                             │
+                             ▼
+ ┌───────────────────┐    ┌───────────────────────────────┐
+ │     Telemetry     │───▶│   Anomaly Detection Engine    │
+ │     Simulator     │    └──────────────┬────────────────┘
+ └───────────────────┘                   │
+                                         ▼
+                          ┌───────────────────────────────┐
+                          │   Observability Engine &      │
+                          │   Blind-Spot Intelligence     │
+                          └──────────────┬────────────────┘
+                                         ▼
+                          ┌───────────────────────────────┐
+                          │ Topology-Aware Localization & │
+                          │     Water Loss Estimator      │
+                          └──────────────┬────────────────┘
+                                         ▼
+                          ┌───────────────────────────────┐
+                          │  Incident Management Service  │
+                          └──────────────┬────────────────┘
+                                         │
+                 ┌───────────────────────┴───────────────────────┐
+                 ▼                                               ▼
+      ┌────────────────────┐                          ┌────────────────────┐
+      │  SQLite Database   │                          │  Gemini 2.5 Flash  │
+      │  (SQLAlchemy ORM)  │                          │ (Server-Side GenAI)│
+      └──────────┬─────────┘                          └──────────┬─────────┘
+                 │                                               │
+                 └───────────────────────┬───────────────────────┘
+                                         ▼
+                               FastAPI REST API Services
+                                         │
+                                         ▼
+                            Next.js 16 Control Room UI
+```
+
+The system strictly enforces backend/frontend separation. The Next.js frontend communicates exclusively via standard JSON REST APIs over HTTP, with a seamless fallback to `DemoContext` fixtures if the backend server is offline.
+
+---
+
+## 🖥️ Frontend Navigation & Routes
+
+- `/` — **Landing Page**: Product introduction, platform differentiators, and system capabilities.
+- `/dashboard` — **Operational Console**: 4 primary KPI cards, interactive topology map overlay, real-time gauges, and scenario switcher.
+- `/network` — **Network Observability**: Topology view highlighting segment observability scores, blind spots, and virtual sensor placement recommendations.
+- `/incidents` — **Incident Lifecycle**: Table of active and historical incidents with status/severity filtering.
+- `/incidents/[id]` — **Incident Detail View**: Candidate segment scoring, evidence list, model loss breakdown, and interactive **AI Analysis Panel**.
+- `/sensors` & `/sensors/[id]` — **Sensors Console**: Individual telemetry charts, rolling Z-score metrics, and sensor health status (`HEALTHY`, `DEGRADED`, `FAULTY`).
+- `/data-sources` — **Government Data Context**: Viewer for Rajasthan rainfall, reservoir, and canal telemetry datasets.
 
 ---
 
@@ -195,79 +245,66 @@ AquaSentinel features 5 built-in, repeatable scenario presets for demonstration 
 hackindia-spark-12-jaipur-rajasthan-north-india-region-bankai/
 ├── backend/
 │   ├── app/
-│   │   ├── api/routes/          # FastAPI REST endpoints (health, network, incidents, data-sources)
-│   │   ├── core/                # Configuration settings & structured logging
-│   │   ├── db/                  # SQLite database engine, ORM models, and repositories
-│   │   ├── models/              # Domain models (zone, pipeline, sensor, reading, anomaly, incident, network)
-│   │   ├── schemas/             # Pydantic request/response schemas (AI analysis, incident, data sources)
+│   │   ├── api/routes/          # FastAPI endpoints (health, network, incidents, data-sources)
+│   │   ├── core/                # Config & logging
+│   │   ├── db/                  # SQLite engine, ORM models, repository pattern
+│   │   ├── models/              # Domain dataclasses & enums
+│   │   ├── schemas/             # Pydantic schemas (ai_analysis, incident, data_source)
 │   │   └── services/            # Anomaly detector, localizer, loss estimator, observability, AI service
-│   ├── experiments/             # Evaluation scripts (ai_analysis_evaluation.py, incident_evaluation.py)
-│   ├── tests/                   # 65 automated unit, API, integration, and grounding tests
 │   ├── data/                    # Offline Rajasthan NWDP government CSV datasets
-│   ├── requirements.txt         # Pinned backend Python dependencies
-│   └── README.md                # Detailed backend documentation
+│   ├── experiments/             # Evaluation scripts (ai_analysis_evaluation.py, incident_evaluation.py)
+│   ├── tests/                   # 65 automated pytest unit & integration tests
+│   ├── requirements.txt         # Pinned Python dependencies
+│   └── README.md                # Backend architecture guide
 │
 ├── frontend/
 │   ├── src/
-│   │   ├── app/                 # Next.js App Router pages (dashboard, network, incidents, sensors, data-sources)
-│   │   ├── components/          # Interactive Control Room UI, SVG Topology Map, AI Analysis Panel
-│   │   ├── context/             # DemoContext & Scenario Controller
-│   │   ├── lib/api/             # Centralized REST API client
-│   │   ├── lib/demo/            # Demo data fixtures & telemetry generator
-│   │   └── types/               # TypeScript data models and enums
+│   │   ├── app/                 # Next.js App Router pages
+│   │   ├── components/          # AppShell, Topology Map, AIAnalysisPanel, Recharts gauges
+│   │   ├── context/             # DemoContext & scenario switcher
+│   │   ├── lib/api/             # REST API client (`client.ts`)
+│   │   └── types/               # TypeScript data types
 │   ├── package.json
 │   └── tsconfig.json
 │
 ├── docs/
 │   └── API_CONTRACT.md          # OpenAPI REST contract specification
-├── LICENSE                      # Open-source license
+├── LICENSE
 └── README.md                    # Root project documentation
 ```
 
 ---
 
-## 🤖 AI Engine & Gemini Integration
+## 🛠️ Technology Stack
 
-AquaSentinel incorporates a server-side **Google Gemini AI** explainability service (`google-genai` SDK):
-
-1. **Server-Side Security**: All Gemini interactions occur 100% server-side in FastAPI. `GEMINI_API_KEY` is managed via `backend/.env` and is **never** exposed to browser JavaScript or client code.
-2. **Grounded Explainability**: Gemini is **not** the primary leak detection engine; deterministic backend algorithms compute facts upstream. Gemini explains pre-computed evidence and generates operator action steps.
-3. **Pydantic Schema Validation**: Enforces JSON schema constraints (`AIAnalysisResult`) on all generated outputs to guarantee structured responses (`summary`, `why_detected`, `recommended_actions`, `confidence_note`, `limitations`).
-4. **Safe Deterministic Fallback**: If `GEMINI_API_KEY` is not configured or the API is unavailable, `AIAnalysisService` seamlessly falls back to a grounded deterministic analysis (`provider: "deterministic_fallback"`), ensuring zero system downtime.
-
----
-
-## 🏛️ Government Data Context Layer
-
-AquaSentinel includes an offline **Government Data Context & Calibration Layer** utilizing actual surface water datasets from Rajasthan, India (sourced from National Water Data Portals / India WRIS):
-
-- **Integrated Datasets**:
-  1. *Rajasthan Surface Water Telemetry Hourly Rainfall* (`rainfall_telemetry`)
-  2. *Rajasthan Surface Water Telemetry Reservoir Level & Storage* (`reservoir_telemetry`)
-  3. *Rajasthan Surface Water Telemetry Canal Discharge* (`canal_telemetry`)
-- **Role & Boundaries**: Government data provides regional environmental context (e.g. ambient rainfall or regional reservoir levels) and baseline calibration data. It does **not** represent direct urban pipeline leak telemetry and does **not** trigger automated leak alerts.
+| Layer | Technologies Used |
+| :--- | :--- |
+| **Backend** | Python 3.14 / 3.11+, FastAPI, Pydantic v2, SQLAlchemy 2.0, NetworkX, NumPy, SciPy, scikit-learn, `google-genai` SDK, SQLite |
+| **Frontend** | Next.js 16 (App Router, Turbopack), React 19, TypeScript, Tailwind CSS, Lucide Icons, Recharts, SVG Network Visualization |
+| **Testing & Quality** | Pytest, Pytest-Asyncio, HTTPX, ESLint, TypeScript Typechecker |
 
 ---
 
 ## 🔌 API Overview
 
-The backend exposes a clean REST API documented in [`docs/API_CONTRACT.md`](file:///a:/Amar/Projects/Project%208%20%28Hack%20India%29/docs/API_CONTRACT.md):
+Detailed request/response schemas and examples are specified in [`docs/API_CONTRACT.md`](file:///a:/Amar/Projects/Project%208%20%28Hack%20India%29/docs/API_CONTRACT.md).
 
-- `GET /api/health` — Backend health status.
-- `GET /api/network` — Current network health summary and active anomaly counts.
-- `GET /api/network/topology` — Full canonical 10-sensor / 10-segment topology graph.
-- `POST /api/incidents/analyze` — End-to-end incident detection, localization, and loss estimation pipeline execution.
-- `GET /api/incidents` — List persisted incidents with optional status/severity filters.
-- `GET /api/incidents/{id}` — Retrieve single incident by ID.
-- `PATCH /api/incidents/{id}/status` — Update incident status (`OPEN` ➔ `ACKNOWLEDGED` ➔ `RESOLVED`).
-- `POST /api/incidents/{id}/ai-analysis` — Generate or fetch grounded Gemini AI analysis.
-- `GET /api/data-sources` — List available government water datasets.
-- `GET /api/data-sources/{id}/summary` — Statistical summary and coverage metrics for a dataset.
-- `GET /api/data-sources/{id}/recent` — Bounded list of recent observations.
+- `GET /api/health` — System health check.
+- `GET /api/network` — Network operational status summary.
+- `GET /api/network/topology` — Full canonical 10-sensor / 10-segment graph topology.
+- `POST /api/incidents/analyze` — Run incident pipeline on telemetry batch.
+- `GET /api/incidents` — List persisted incidents.
+- `GET /api/incidents/{incident_id}` — Retrieve single incident details.
+- `PATCH /api/incidents/{incident_id}/status` — Update incident status (`OPEN` ➔ `ACKNOWLEDGED` ➔ `RESOLVED`).
+- `POST /api/incidents/{incident_id}/ai-analysis` — Generate or fetch grounded Gemini AI analysis.
+- `GET /api/data-sources` — List government context datasets.
+- `GET /api/data-sources/{source_id}` — Retrieve dataset metadata.
+- `GET /api/data-sources/{source_id}/summary` — Dataset statistical summary & historical calibration metrics.
+- `GET /api/data-sources/{source_id}/recent` — Recent observations for dataset.
 
 ---
 
-## ⚙️ Installation & Local Setup
+## ⚙️ Local Setup & Setup Instructions
 
 ### Prerequisites
 - **Python**: `3.11` or `3.14+`
@@ -283,16 +320,18 @@ cd hackindia-spark-12-jaipur-rajasthan-north-india-region-bankai
 ```bash
 cd backend
 
-# Create & activate virtual environment (optional)
-python -m venv venv
-# On Windows: venv\Scripts\activate
-# On Linux/macOS: source venv/bin/activate
+# Create virtual environment
+python -m venv .venv
+
+# Activate virtual environment
+# Windows (PowerShell): .venv\Scripts\Activate.ps1
+# Linux/macOS: source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Create .env file for Gemini API Key (optional)
-echo GEMINI_API_KEY="your-gemini-api-key" > .env
+# Create .env for optional Gemini AI Key
+echo GEMINI_API_KEY="your-api-key-here" > .env
 echo GEMINI_MODEL="gemini-2.5-flash" >> .env
 ```
 
@@ -304,45 +343,36 @@ npm install
 
 ---
 
-## 🏃 Running the Full Project
+## 🏃 Running the Full System
 
-### Step 1: Start Backend API Server
-In terminal 1:
+### Terminal 1: Backend Server
 ```bash
 cd backend
 python -m uvicorn app.main:app --reload --port 8000
 ```
-*Backend API will run at `http://127.0.0.1:8000` (OpenAPI docs at `http://127.0.0.1:8000/docs`).*
+- **Backend API**: `http://127.0.0.1:8000`
+- **Interactive Swagger Docs**: `http://127.0.0.1:8000/docs`
 
-### Step 2: Start Frontend Control Room
-In terminal 2:
+### Terminal 2: Frontend Control Room
 ```bash
 cd frontend
 npm run dev
 ```
-*Frontend Control Room will run at `http://localhost:3000`.*
+- **Frontend Control Room**: `http://localhost:3000`
 
 ---
 
-## 🧪 Testing
+## 🧪 Testing & Validation
 
-### Backend Unit & Integration Test Suite
-AquaSentinel includes a 65-test suite covering simulator logic, anomaly detection, topology graph traversal, loss estimation, incident persistence lifecycle, API routes, and AI grounding checks.
+### Backend Automated Test Suite (65 Passed Tests)
+AquaSentinel includes a comprehensive test suite verifying anomaly detection, observability scoring, localization graph logic, loss estimation, database lifecycle persistence, government data parsing, and AI grounding checks:
 
 ```bash
 cd backend
 python -m pytest
 ```
-*Expected output: `65 passed`.*
 
-### AI Evaluation Script
-Evaluate Gemini AI structured generation across scenarios:
-```bash
-cd backend
-python experiments/ai_analysis_evaluation.py
-```
-
-### Frontend Build & Lint Checks
+### Frontend Build & Type Validation
 ```bash
 cd frontend
 npm run lint
@@ -351,58 +381,80 @@ npm run build
 
 ---
 
-## 🎮 Demo Walkthrough for Judges
+## ⏱️ 2-Minute Demo Guide for Judges
 
-1. **Landing Page (`/`)**: Overview of AquaSentinel, platform architecture, and entry to Control Room.
-2. **Dashboard (`/dashboard`)**:
-   - Observe 4 high-level KPI cards (Network Status, Active Incidents, Total Water Loss Rate, Observability Index).
-   - Use the **Scenario Control** dropdown in the left sidebar to toggle between scenarios.
-   - Select **Scenario B: Gradual Leak (B2-B3)** and watch segment `B2-B3` pulse red on the SVG map.
-3. **Network Topology (`/network`)**:
-   - Inspect the interactive SVG graph displaying all 10 canonical nodes and 10 pipeline segments.
-   - Hover over nodes to inspect sensor telemetry readings and segment health scores.
-4. **Incidents (`/incidents` & `/incidents/[id]`)**:
-   - View active incidents in the control table.
-   - Click on an incident to view detail metrics, candidate segment confidence breakdown, and spatial evidence.
-   - Click **"Analyze"** in the **AI Incident Analysis Panel** to trigger Gemini AI explainability.
-   - Click **"Acknowledge"** and **"Resolve"** buttons to test the lifecycle state machine.
-5. **Sensor Fault Demonstration (Scenario D)**:
-   - Select **Scenario D: Sensor Fault (B3)**.
-   - Observe that Sensor `B3` is highlighted yellow/amber, while pipeline segments `B2-B3` and `B3-B4` remain **cyan/healthy**.
-   - Verify that **0 false leak alarms** are created on the pipeline network.
-6. **Government Context (`/data-sources`)**:
-   - Browse regional Rajasthan surface water datasets (Rainfall, Reservoir Storage, Canal Discharge) and view statistical summaries and recent observations.
+1. **Start at Landing Page (`http://localhost:3000`)**: View value proposition and click **"Launch Control Room"**.
+2. **Dashboard (`/dashboard`)**: Show normal healthy network status.
+3. **Trigger Scenario B (Gradual Leak)**: Select **Scenario B** in the left sidebar.
+   - Observe pipeline edge `B2-B3` pulse red.
+   - Click on incident `INC-66964E0E` in the table to open detail view.
+   - Review correlated evidence, observability score (**89.7%**), and estimated flow loss (**30.94 LPM**).
+   - Click **"Analyze"** in the **AI Analysis Panel** to view server-side Gemini 2.5 Flash explainability.
+   - Click **"Acknowledge"** and **"Resolve"** to demonstrate incident state transitions.
+4. **Trigger Scenario D (Sensor Fault Prevention)**: Select **Scenario D** in the sidebar.
+   - Show sensor `B3` highlighted in yellow/amber while pipeline edges `B2-B3` and `B3-B4` remain **cyan/healthy**.
+   - Point out that **0 false leak alarms** were declared.
+5. **Inspect Network Observability (`/network`)**: Show simulated segment observability scores and virtual sensor placement recommendations.
+6. **Browse Government Data (`/data-sources`)**: View regional Rajasthan surface water telemetry context.
 
 ---
 
 ## ⚠️ Limitations & Responsible Claims
 
-- **Software Prototype**: AquaSentinel is a software demonstration prototype built for hackathon evaluation using a simplified synthetic water distribution network topology.
-- **Model-Derived Loss Estimates**: Flow loss rates (LPM) and volume loss figures (Liters) are model-derived simulation estimates intended for system evaluation and do not represent physically calibrated hydraulic field measurements.
-- **Government Data Role**: Offline Rajasthan surface water telemetry provides descriptive regional context and baseline calibration; it is not a live runtime dependency for pipeline leak alerts.
-- **AI Boundaries**: Gemini AI provides server-side grounded explainability over computed backend facts; it does not replace core deterministic anomaly detection algorithms.
+- **Software Prototype**: AquaSentinel is a software demonstration prototype built for hackathon evaluation using a synthetic 10-node water distribution network topology.
+- **Simulated Telemetry**: Telemetry is generated via synthetic diurnal simulation models rather than real-world physical IoT sensors.
+- **Model-Derived Loss Estimates**: Flow loss rates (LPM) and accumulated volume figures (Liters) are model-derived simulation estimates intended for system evaluation.
+- **Topology-Aware Localization**: Localization uses NetworkX graph reasoning and correlated sensor signals, not physically validated real-world hydraulic models.
+- **Government Context**: Rajasthan surface water telemetry provides regional environmental context; it does not directly measure underground pipeline leaks.
+- **Candidate Sensor Placement**: Virtual sensor placement recommendations are model-derived heuristics, not globally optimal mathematical guarantees.
+- **AI Explanations**: Gemini 2.5 Flash is an explainability and operator decision support layer, not the primary incident detection engine.
 
 ---
 
-## 📅 Completed Milestones & Roadmap
+## 🔒 Security
 
-- [x] **Milestone 1**: Project foundation, domain models, NetworkX graph topology engine, database setup, Pytest test suite.
-- [x] **Milestone 2**: Synthetic IoT Sensor Simulator (diurnal curves, noise, drift, leak/burst/fault scenarios, deterministic seeds).
-- [x] **Milestone 3**: Anomaly Detection Engine (rolling Z-scores, spatial graph neighbor comparison, Isolation Forest).
-- [x] **Milestone 4**: Network Observability & Blind-Spot Intelligence (simulated observability scores, virtual sensor placement engine).
-- [x] **Milestone 5**: Leak Detection, Topology-Aware Localization & Water Loss Estimator (spatial candidate scoring, flow/volume loss estimation).
-- [x] **Milestone 6**: Incident Persistence Lifecycle & Database ORM (SQLAlchemy, status transitions, idempotent fingerprinting).
-- [x] **Milestone 7**: Government Data Context & Calibration Layer (Offline Rajasthan NWDP loaders, summary statistics, provenance metadata).
-- [x] **Frontend**: Production-quality Next.js 16 Control Room UI with interactive SVG topology map, Recharts telemetry charts, and incident management console.
-- [x] **Milestone 9**: Grounded Gemini AI Analysis & Response Intelligence (Server-side Gemini 2.5 Flash SDK, Pydantic schema validation, safe deterministic fallback).
-- [x] **System QA**: 100% automated test pass rate (65/65 pytest tests) and clean production build.
+- All API keys (`GEMINI_API_KEY`) are managed strictly server-side in `backend/.env`.
+- `.env` files are included in `.gitignore` and **never committed**.
+- The frontend client never receives secret credentials or provider keys.
+
+---
+
+## 📅 Roadmap
+
+### Implemented (Current MVP)
+- [x] Synthetic IoT telemetry simulator with diurnal demand curves
+- [x] Statistical anomaly detection (Z-scores & Isolation Forest)
+- [x] Network observability & blind-spot intelligence
+- [x] Topology-aware leak localization (NetworkX graph engine)
+- [x] Model-derived water-loss estimation (LPM & Volume)
+- [x] Persistent incident management & lifecycle state machine (`OPEN` ➔ `ACK` ➔ `RESOLVED`)
+- [x] Offline Rajasthan surface water government data context layer
+- [x] Server-side grounded Gemini 2.5 Flash AI explainability
+- [x] Production-quality Next.js 16 control room interface
+
+### Future Roadmap
+- [ ] Physical IoT hardware sensor integration (ESP32 / Modbus pressure transducers)
+- [ ] EPANET hydraulic model integration & field calibration
+- [ ] Real-time WebSocket streaming telemetry
+- [ ] GIS map overlays with geospatial shapefile support
+- [ ] Production SMS/Webhook alerting for field crews
+
+---
+
+## 🏆 Hackathon Highlights
+
+- **End-to-End Full-Stack Architecture**: Fully connected FastAPI backend and Next.js frontend with OpenAPI REST contract.
+- **10-Sensor Canonical Network**: Realistic directed graph topology with 3 distinct sub-zones.
+- **Deterministic & Explainable**: Core leak detection and localization rely on explainable math and graph algorithms.
+- **Sensor Fault Distinction**: Successfully prevents false leak alarms when isolated sensor transducers fail.
+- **Grounded AI Intelligence**: Gemini AI provides operator explanations bounded strictly by pre-computed backend evidence.
 
 ---
 
 ## 👥 Team & Project Metadata
 
-- **Event**: HackIndia 2026
-- **Team**: Bankai
+- **Hackathon**: HackIndia Spark-12 Jaipur 2026
+- **Team Name**: Bankai
 - **Repository Tag**: `hackindia-spark-12-jaipur-rajasthan-north-india-region-bankai`
 - **GitHub Repository**: [`https://github.com/HackIndiaXYZ/hackindia-spark-12-jaipur-rajasthan-north-india-region-bankai`](https://github.com/HackIndiaXYZ/hackindia-spark-12-jaipur-rajasthan-north-india-region-bankai)
-- **License**: Open Source / MIT
+- **License**: MIT
