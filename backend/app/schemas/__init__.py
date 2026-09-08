@@ -4,6 +4,7 @@ from app.schemas.sensor import SensorSchema, SensorCreate
 from app.schemas.network import NetworkTopologySchema, NetworkStatusSchema, NetworkNodeSchema
 from app.schemas.reading import SensorReadingSchema, SensorReadingCreate
 from app.schemas.simulation import SimulationScenarioRequest, SimulationStatusSchema, ScenarioType, FaultType
+from app.schemas.anomaly import AnomalyResultSchema
 
 __all__ = [
     "ZoneSchema",
@@ -20,5 +21,6 @@ __all__ = [
     "SimulationScenarioRequest",
     "SimulationStatusSchema",
     "ScenarioType",
-    "FaultType"
+    "FaultType",
+    "AnomalyResultSchema"
 ]
