@@ -63,7 +63,7 @@ export interface Sensor {
   pipeline_segment_id: string;
   location_node: string;
   sensor_type: string;
-  installation_metadata?: Record<string, any>;
+  installation_metadata?: Record<string, unknown>;
   health_status: "HEALTHY" | "DEGRADED" | "FAULTY";
 }
 
@@ -124,7 +124,7 @@ export interface GovernmentObservation {
   value: number;
   unit: string;
   station_name: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface SensorReading {

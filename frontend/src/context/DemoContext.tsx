@@ -2,8 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { ScenarioType, Incident } from "@/types";
-import { CANONICAL_TOPOLOGY, SCENARIO_STATES, ScenarioDemoState, generateScenarioReadings } from "@/lib/demo/demoData";
-import { checkBackendHealth, getNetworkStatus, listIncidents, updateIncidentStatus, analyzeTelemetry } from "@/lib/api/client";
+import { SCENARIO_STATES, ScenarioDemoState, generateScenarioReadings } from "@/lib/demo/demoData";
+import { checkBackendHealth, listIncidents, updateIncidentStatus, analyzeTelemetry } from "@/lib/api/client";
 
 interface DemoContextType {
   scenario: ScenarioType;
@@ -34,6 +34,7 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     checkHealth();
     const interval = setInterval(checkHealth, 10000);
     return () => clearInterval(interval);
@@ -49,7 +50,7 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isBackendLive && !isDemoMode) {
       try {
         const readings = generateScenarioReadings(newScenario);
-        const result = await analyzeTelemetry(readings);
+        await analyzeTelemetry(readings);
         const realList = await listIncidents();
         setBackendIncidents(realList);
       } catch (err) {
@@ -72,6 +73,7 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     if (!isDemoMode && isBackendLive) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       refreshBackendData();
     }
   }, [isDemoMode, isBackendLive, refreshBackendData]);

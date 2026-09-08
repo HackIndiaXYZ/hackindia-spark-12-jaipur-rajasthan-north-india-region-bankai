@@ -13,9 +13,7 @@ import {
   Activity,
   Server,
   Play,
-  ShieldAlert,
-  Zap,
-  Info
+  Zap
 } from "lucide-react";
 import { useDemo } from "@/context/DemoContext";
 import { ScenarioType } from "@/types";

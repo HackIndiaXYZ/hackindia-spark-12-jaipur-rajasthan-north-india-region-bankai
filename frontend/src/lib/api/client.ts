@@ -14,7 +14,7 @@ export async function checkBackendHealth(): Promise<boolean> {
   try {
     const res = await fetch(`${API_BASE_URL}/health`, { cache: "no-store" });
     return res.ok;
-  } catch (err) {
+  } catch (_err) {
     return false;
   }
 }

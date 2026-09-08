@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { NetworkTopology, Incident } from "@/types";
-import { AlertTriangle, Radio, ShieldCheck, Zap, Info, Droplets } from "lucide-react";
+import { Droplets } from "lucide-react";
 
 interface NetworkTopologyMapProps {
   topology: NetworkTopology;

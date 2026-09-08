@@ -32,6 +32,7 @@ export const AIAnalysisPanel: React.FC<AIAnalysisPanelProps> = ({
 
   // Sync props if initial props change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (initialWhy) setWhyDetected(initialWhy);
     if (initialActions) setRecommendedActions(initialActions);
     if (initialConfidence) setConfidenceNote(initialConfidence);
