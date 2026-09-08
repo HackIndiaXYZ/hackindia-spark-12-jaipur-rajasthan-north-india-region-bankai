@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0b0f19;
+  --foreground: #f1f5f9;
+}
+
+body {
+  background-color: #0b0f19;
+  color: #f1f5f9;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom Animations */
+@keyframes pipePulseRed {
+  0% {
+    stroke: #ef4444;
+    stroke-width: 6px;
+    filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.6));
+  }
+  50% {
+    stroke: #f87171;
+    stroke-width: 9px;
+    filter: drop-shadow(0 0 14px rgba(239, 68, 68, 1));
+  }
+  100% {
+    stroke: #ef4444;
+    stroke-width: 6px;
+    filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.6));
+  }
+}
+
+@keyframes sensorFaultPulse {
+  0% {
+    r: 14px;
+    fill: #f59e0b;
+    filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.7));
+  }
+  50% {
+    r: 19px;
+    fill: #ef4444;
+    filter: drop-shadow(0 0 16px rgba(239, 68, 68, 1));
+  }
+  100% {
+    r: 14px;
+    fill: #f59e0b;
+    filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.7));
+  }
+}
+
+@keyframes glowCyan {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(6, 182, 212, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 14px rgba(6, 182, 212, 0.9));
+  }
+}
+
+.animate-pipe-leak {
+  animation: pipePulseRed 1.6s infinite ease-in-out;
+}
+
+.animate-sensor-fault {
+  animation: sensorFaultPulse 1.4s infinite ease-in-out;
+}
+
+.animate-glow-cyan {
+  animation: glowCyan 2.5s infinite ease-in-out;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
