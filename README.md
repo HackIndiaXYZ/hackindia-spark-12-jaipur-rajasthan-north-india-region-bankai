@@ -8,6 +8,15 @@
 
 ---
 
+## 🌐 Live Production Deployments
+
+- 🖥️ **Live Vercel Frontend Control Room**: [`https://aquasentinel-rouge.vercel.app`](https://aquasentinel-rouge.vercel.app)
+- ⚙️ **Live Render Backend API Service**: [`https://aquasentinel-api-r00y.onrender.com`](https://aquasentinel-api-r00y.onrender.com)
+- 📚 **Interactive Swagger API Documentation**: [`https://aquasentinel-api-r00y.onrender.com/docs`](https://aquasentinel-api-r00y.onrender.com/docs)
+- 📦 **Official GitHub Repository**: [`https://github.com/HackIndiaXYZ/hackindia-spark-12-jaipur-rajasthan-north-india-region-bankai`](https://github.com/HackIndiaXYZ/hackindia-spark-12-jaipur-rajasthan-north-india-region-bankai)
+
+---
+
 ## ⚡ Executive Summary (Judge Quick View)
 
 | What | Why | Differentiator | Live Demo |
@@ -456,5 +465,7 @@ npm run build
 - **Hackathon**: HackIndia Spark-12 Jaipur 2026
 - **Team Name**: Bankai
 - **Repository Tag**: `hackindia-spark-12-jaipur-rajasthan-north-india-region-bankai`
-- **GitHub Repository**: [`https://github.com/HackIndiaXYZ/hackindia-spark-12-jaipur-rajasthan-north-india-region-bankai`](https://github.com/HackIndiaXYZ/hackindia-spark-12-jaipur-rajasthan-north-india-region-bankai)
+- **Official GitHub Repository**: [`https://github.com/HackIndiaXYZ/hackindia-spark-12-jaipur-rajasthan-north-india-region-bankai`](https://github.com/HackIndiaXYZ/hackindia-spark-12-jaipur-rajasthan-north-india-region-bankai)
+- **Live Vercel Frontend**: [`https://aquasentinel-rouge.vercel.app`](https://aquasentinel-rouge.vercel.app)
+- **Live Render Backend API**: [`https://aquasentinel-api-r00y.onrender.com`](https://aquasentinel-api-r00y.onrender.com)
 - **License**: MIT
