@@ -1,15 +1,18 @@
 from datetime import datetime
 from typing import List, Dict, Any, Optional
+import uuid
 import numpy as np
+from sqlalchemy.orm import Session
 
 from app.models.reading import SensorReading
 from app.models.anomaly import AnomalyResult
-from app.models.incident import IncidentResult, IncidentType, IncidentSeverity
+from app.models.incident import IncidentResult, IncidentType, IncidentSeverity, IncidentStatus, CandidateSegmentScore
 from app.models.network import WaterNetwork
 from app.services.anomaly_detector import AnomalyDetector
 from app.services.localization import LeakLocalizer
 from app.services.loss_estimator import WaterLossEstimator
 from app.services.observability import ObservabilityService
+from app.db.repositories.incident_repository import IncidentRepository, generate_incident_fingerprint
 from app.core.logging import logger
 
 
@@ -17,7 +20,7 @@ class IncidentService:
     """
     End-to-End Pipeline Incident Service for AquaSentinel.
     Consumes sensor readings, runs anomaly detection, localizes leak segments,
-    estimates water loss, integrates observability context, and constructs IncidentResult objects.
+    estimates water loss, integrates observability context, and persists incidents idempotently.
     """
 
     def __init__(self, network: Optional[WaterNetwork] = None):
@@ -96,8 +99,9 @@ class IncidentService:
         start_ts = min([r.timestamp for r in readings])
         delay_min = (first_detected_ts - start_ts).total_seconds() / 60.0
 
-        inc_id = f"INC-{self._incident_counter:03d}"
-        self._incident_counter += 1
+        inc_id = f"INC-{uuid.uuid4().hex[:8].upper()}"
+
+        fingerprint = generate_incident_fingerprint(affected_seg_id, inc_type.value, first_detected_ts)
 
         evidence_notes = loc_info["evidence"] + [
             f"Estimated flow loss rate: {flow_loss:.1f} LPM ({vol_loss:.0f} Liters accumulated)",
@@ -106,11 +110,15 @@ class IncidentService:
 
         return IncidentResult(
             incident_id=inc_id,
+            fingerprint=fingerprint,
             incident_type=inc_type,
             severity=severity,
+            status=IncidentStatus.OPEN,
             affected_segment=affected_seg_id,
             affected_zone=affected_zone_id,
             detected_at=first_detected_ts,
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow(),
             detection_delay_min=delay_min,
             confidence=confidence,
             responsive_sensors=resp_sensors,
@@ -120,3 +128,23 @@ class IncidentService:
             evidence=evidence_notes,
             observability_score=obs_score
         )
+
+    def process_and_persist_telemetry(self, readings: List[SensorReading], db: Optional[Session] = None) -> Optional[IncidentResult]:
+        """
+        Processes telemetry and, if db session is provided, persists result idempotently to database.
+        """
+        result = self.process_telemetry(readings)
+        if not result:
+            return None
+
+        if db:
+            model, created = IncidentRepository.create_or_get(db, result)
+            
+            # Map DB persisted fields back to domain result
+            result.incident_id = model.incident_id
+            result.fingerprint = model.fingerprint
+            result.status = IncidentStatus(model.status)
+            result.created_at = model.created_at
+            result.updated_at = model.updated_at
+
+        return result

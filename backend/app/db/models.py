@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import (
-    Column, String, Float, Integer, DateTime, ForeignKey, Text, JSON, Enum
+    Column, String, Float, Integer, DateTime, ForeignKey, Text, JSON, Enum as SQLEnum
 )
 from sqlalchemy.orm import relationship
 import enum
@@ -15,10 +15,16 @@ class HealthStatusEnum(str, enum.Enum):
 
 
 class IncidentStatusEnum(str, enum.Enum):
-    DETECTED = "DETECTED"
-    INVESTIGATING = "INVESTIGATING"
-    CONFIRMED = "CONFIRMED"
+    OPEN = "OPEN"
+    ACKNOWLEDGED = "ACKNOWLEDGED"
     RESOLVED = "RESOLVED"
+
+
+class IncidentSeverityEnum(str, enum.Enum):
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    CRITICAL = "CRITICAL"
 
 
 class ZoneModel(Base):
@@ -59,7 +65,7 @@ class SensorModel(Base):
     zone_id = Column(String, ForeignKey("zones.zone_id"), nullable=False)
     pipeline_segment_id = Column(String, ForeignKey("pipeline_segments.segment_id"), nullable=True)
     location_node = Column(String, nullable=False)
-    sensor_type = Column(String, nullable=False, default="multi-sensor")  # pressure, flow, multi-sensor
+    sensor_type = Column(String, nullable=False, default="multi-sensor")
     installation_date = Column(String, nullable=True)
     model = Column(String, nullable=True)
     firmware_version = Column(String, nullable=True)
@@ -93,32 +99,39 @@ class AnomalyModel(Base):
     timestamp = Column(DateTime, default=datetime.utcnow, index=True)
     sensor_id = Column(String, ForeignKey("sensors.sensor_id"), nullable=False)
     anomaly_score = Column(Float, nullable=False)
-    signals = Column(JSON, nullable=False)  # List of signal descriptions
-    is_active = Column(Integer, default=1)  # 1 for active, 0 for resolved
+    signals = Column(JSON, nullable=False)
+    is_active = Column(Integer, default=1)
 
 
-class LeakEventModel(Base):
-    __tablename__ = "leak_events"
+class IncidentModel(Base):
+    __tablename__ = "incidents"
 
     incident_id = Column(String, primary_key=True, index=True)
-    detected_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    zone_id = Column(String, nullable=False)
-    segment_id = Column(String, nullable=False)
-    severity = Column(String, nullable=False)  # LOW, MEDIUM, HIGH, CRITICAL
-    leak_probability = Column(Float, nullable=False)
-    confidence = Column(Float, nullable=False)
-    estimated_loss_lpm = Column(Float, nullable=False)
-    status = Column(String, default="DETECTED")  # DETECTED, INVESTIGATING, CONFIRMED, RESOLVED
-    candidate_segments = Column(JSON, nullable=True)
+    fingerprint = Column(String, unique=True, index=True, nullable=False)
+    incident_type = Column(String, nullable=False, default="LEAK_SUSPECTED")
+    severity = Column(String, nullable=False, default="MEDIUM")
+    status = Column(String, nullable=False, default="OPEN", index=True)
+    affected_segment = Column(String, nullable=False, index=True)
+    affected_zone = Column(String, nullable=False, index=True)
+    detected_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    detection_delay_min = Column(Float, nullable=False, default=0.0)
+    confidence = Column(Float, nullable=False, default=0.5)
+    observability_score = Column(Float, nullable=False, default=0.5)
+    estimated_flow_loss_lpm = Column(Float, nullable=False, default=0.0)
+    estimated_volume_loss_liters = Column(Float, nullable=False, default=0.0)
     evidence = Column(JSON, nullable=True)
+    responsive_sensors = Column(JSON, nullable=True)
+    candidate_segments = Column(JSON, nullable=True)
+    disclaimer = Column(Text, nullable=True)
 
 
 class GovernmentDatasetModel(Base):
     __tablename__ = "government_datasets"
 
     id = Column(String, primary_key=True, index=True)
-    source_name = Column(String, nullable=False)  # NWIC, Data.gov.in, ISRO/Bhuvan
+    source_name = Column(String, nullable=False)
     dataset_name = Column(String, nullable=False)
     retrieved_at = Column(DateTime, default=datetime.utcnow)
     raw_data = Column(JSON, nullable=True)
@@ -131,7 +144,7 @@ class AIAnalysisModel(Base):
     __tablename__ = "ai_analyses"
 
     analysis_id = Column(String, primary_key=True, index=True)
-    incident_id = Column(String, ForeignKey("leak_events.incident_id"), nullable=False)
+    incident_id = Column(String, ForeignKey("incidents.incident_id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     summary = Column(Text, nullable=False)
     explanation = Column(Text, nullable=False)
