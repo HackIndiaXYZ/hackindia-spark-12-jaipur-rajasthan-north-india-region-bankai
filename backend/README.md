@@ -1,6 +1,6 @@
 # AquaSentinel Backend
 
-AquaSentinel is an intelligent water pipeline monitoring and leak detection platform built for hackathon demonstration. This package contains the complete Python/FastAPI backend, synthetic IoT network simulator, anomaly detection algorithms, leak probability and localization engine, government data adapters, and AI reasoning integration.
+AquaSentinel is an intelligent water pipeline monitoring and leak detection platform built for hackathon demonstration. This package contains the complete Python/FastAPI backend, synthetic IoT network simulator, anomaly detection algorithms, topology-aware leak localization engine, water loss estimator, incident management pipeline, government data adapters, and AI reasoning integration.
 
 ---
 
@@ -13,35 +13,52 @@ backend/
 │   ├── api/                      # REST API endpoints
 │   │   └── routes/
 │   │       ├── health.py         # /api/health endpoint
-│   │       └── network.py        # /api/network topology & status
+│   │       ├── network.py        # /api/network topology & status
+│   │       └── incidents.py      # /api/incidents/analyze endpoint
 │   ├── core/                     # Configuration and structured logging
 │   │   ├── config.py
 │   │   └── logging.py
 │   ├── db/                       # Database engines and ORM models
 │   │   ├── database.py           # SQLite fallback & PostgreSQL support
 │   │   └── models.py             # SQLAlchemy ORM definitions
-│   ├── models/                   # Water network domain models
-│   │   ├── zone.py               # Water network zone model
-│   │   ├── pipeline.py           # Pipeline segment model
-│   │   ├── sensor.py             # IoT sensor domain model
-│   │   ├── reading.py            # Sensor telemetry reading model
-│   │   └── network.py            # Graph topology network model
+│   ├── models/                   # Water network & incident domain models
+│   │   ├── zone.py
+│   │   ├── pipeline.py
+│   │   ├── sensor.py
+│   │   ├── reading.py
+│   │   ├── anomaly.py
+│   │   ├── observability.py
+│   │   ├── incident.py           # Incident domain model & enums
+│   │   └── network.py
 │   ├── schemas/                  # Pydantic API response/request schemas
 │   │   ├── zone.py
 │   │   ├── pipeline.py
 │   │   ├── sensor.py
-│   │   ├── reading.py            # Sensor reading schemas
-│   │   ├── simulation.py         # Simulation scenario request & status schemas
+│   │   ├── reading.py
+│   │   ├── anomaly.py
+│   │   ├── observability.py
+│   │   ├── incident.py           # Incident schemas
 │   │   └── network.py
-│   └── services/                 # Business logic & simulation services
-│       └── simulator.py          # Synthetic IoT Sensor Simulator service
-├── scripts/                      # Data generation & setup scripts
-│   └── generate_demo_data.py     # Demo scenario dataset generator
+│   └── services/                 # Business logic & intelligence engines
+│       ├── simulator.py          # Synthetic IoT Sensor Simulator service
+│       ├── anomaly_detector.py   # Anomaly Detection service (Z-score + IsolationForest)
+│       ├── observability.py      # Network Observability & Blind-spot engine
+│       ├── localization.py       # Topology-aware Leak Localizer
+│       ├── loss_estimator.py     # Model-derived Water Loss Estimator
+│       └── incident_service.py   # End-to-End Incident Pipeline service
+├── scripts/                      # Data generation & evaluation scripts
+│   ├── generate_demo_data.py
+│   ├── evaluate_anomaly_detection.py
+│   ├── evaluate_incident_pipeline.py
+│   └── observability_evaluation.py
 ├── tests/                        # Automated unit & API tests
 │   ├── conftest.py
 │   ├── test_network_models.py
 │   ├── test_health_api.py
-│   └── test_simulator.py        # Comprehensive simulator unit test suite
+│   ├── test_simulator.py
+│   ├── test_anomaly_detection.py
+│   ├── test_observability.py
+│   └── test_incident.py          # Incident pipeline unit tests
 ├── .env.example                  # Environment template
 ├── requirements.txt              # Backend dependencies
 └── README.md                     # Backend documentation
@@ -73,57 +90,53 @@ AquaSentinel models a virtual water distribution network as a directed graph (`N
 
 ---
 
-## 📡 Synthetic IoT Sensor Simulator
+## 🚨 Incident Pipeline & Leak Localization
 
-AquaSentinel includes a deterministic synthetic IoT telemetry simulator to simulate realistic pipeline conditions without physical hardware.
+The AquaSentinel incident pipeline processes simulated sensor telemetry to identify, localize, and estimate the severity of pipeline leaks and burst events:
 
-> **Note**: All sensor telemetry in the MVP is synthetically generated based on physical head-loss heuristics and network topology propagation.
+### 1. Topology-Aware Localization (`LeakLocalizer`)
+- Analyzes spatial relationships between responsive sensors using `NetworkX` graph traversal.
+- Scores candidate pipeline segments based on direct connectivity between responsive sensors, directional flow/pressure head loss, and path alignment.
+- **Sensor Fault Distinction**: Isolated single-sensor anomalies (e.g. noise spikes or faulty health status without neighboring sensor support) are correctly identified as sensor faults rather than false pipeline leaks.
 
-### Simulator Features
-- **Diurnal Time-of-Day Demand Curve**: Smooth multi-peak diurnal variation (morning peak ~08:00, evening peak ~19:00, night trough ~03:00).
-- **Pressure-Flow Physics Correlation**: Increased demand/flow correlates with friction head loss (decreased pressure downstream).
-- **Noise & Drift**: Configurable Gaussian measurement noise and linear sensor calibration drift.
-- **Deterministic Random Seed**: Identical seed produces identical time series across runs.
+### 2. Model-Derived Loss Estimator (`WaterLossEstimator`)
+- Calculates instantaneous flow loss rate in Liters Per Minute (LPM) and accumulated volume loss in Liters.
+- Uses explainable baseline flow comparison ($\Delta Q = Q_{\text{observed}} - Q_{\text{expected}}$) and pressure head loss heuristics.
+- > **Disclaimer**: *Loss values are model-derived simulation estimates intended for demonstration and system evaluation.*
 
-### Supported Simulation Scenarios
-1. `normal_operation`: Standard demand curve, nominal flow/pressure ranges, minor noise and drift.
-2. `gradual_leak`: Pressure slowly drops while flow increases at the affected segment over time.
-3. `sudden_burst`: Abrupt pressure drop and flow spike occurring instantly at a specified minute.
-4. `sensor_fault`: Single sensor fault (e.g. `stuck`, `spike`, `drop`, `high_noise`) without network-wide hydraulic change.
-5. `multiple_anomalies`: Simultaneous leak and sensor fault events.
+### 3. Incident Confidence & Severity Classification (`IncidentService`)
+- **Normalized Confidence**: Weighted combination of localization confidence (45%), average anomaly score (30%), zone sensor response ratio (15%), and segment observability score (10%).
+- **Severity Thresholds**:
+  - `CRITICAL`: Confidence $\ge 0.70$ AND (Flow loss $\ge 40$ LPM OR Volume loss $\ge 800$ Liters)
+  - `HIGH`: Confidence $\ge 0.60$ AND (Flow loss $\ge 20$ LPM OR Volume loss $\ge 300$ Liters)
+  - `MEDIUM`: Confidence $\ge 0.50$ AND Flow loss $\ge 10$ LPM
+  - `LOW`: Baseline leak detection.
 
 ---
 
 ## 🚀 Setup & Execution
 
-### 1. Prerequisites
-- Python 3.11+
-- virtualenv (optional but recommended)
-
-### 2. Install Dependencies
+### 1. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Run Automated Tests
+### 2. Run Automated Test Suite
 ```bash
 pytest
 ```
 
-### 4. Generate Demo Scenario Datasets
+### 3. Run Incident Pipeline Evaluation
 ```bash
-python scripts/generate_demo_data.py
+python experiments/incident_evaluation.py
 ```
-This produces CSV datasets in `demo_datasets/` for `normal_operation`, `gradual_leak`, `sudden_burst`, and `sensor_fault`.
 
-### 5. Launch Backend Server
+### 4. Launch Backend API Server
 ```bash
 python -m uvicorn app.main:app --reload --port 8000
 ```
 - Interactive OpenAPI Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
-- API Health Endpoint: [http://localhost:8000/api/health](http://localhost:8000/api/health)
-- Network Status: [http://localhost:8000/api/network](http://localhost:8000/api/network)
-- Network Topology: [http://localhost:8000/api/network/topology](http://localhost:8000/api/network/topology)
+- POST Incident Analysis Endpoint: `http://localhost:8000/api/incidents/analyze`
 
 ---
 
@@ -131,11 +144,11 @@ python -m uvicorn app.main:app --reload --port 8000
 
 - [x] **Milestone 1**: Project structure, domain models, graph network topology, Pydantic schemas, database configuration, initial test suite.
 - [x] **Milestone 2**: Synthetic IoT Sensor Simulator (normal operation, demand curves, noise, drift, leak/burst/fault scenarios, deterministic seeds).
-- [ ] **Milestone 3**: Anomaly Detection Engine (rolling statistics, z-score, Isolation Forest).
-- [ ] **Milestone 4**: Leak Probability, Severity & Water Loss Estimator.
-- [ ] **Milestone 5**: Graph-based Leak Localization Algorithm.
-- [ ] **Milestone 6**: Incident Management & Lifecycle Persistence.
-- [ ] **Milestone 7**: Complete REST API endpoints for readings, anomalies, leaks, and simulation control.
+- [x] **Milestone 3**: Anomaly Detection Engine (rolling statistics, z-score, Isolation Forest).
+- [x] **Milestone 4**: Network Observability & Blind-Spot Intelligence (observability scores, virtual sensor placement engine).
+- [x] **Milestone 5**: Leak Detection, Localization & Loss Estimator (topology-aware localization, flow/volume loss estimation, confidence & severity scoring).
+- [ ] **Milestone 6**: Incident Management & Persistence Lifecycle.
+- [ ] **Milestone 7**: Complete REST API Endpoints.
 - [ ] **Milestone 8**: External Government Water Data Adapters (NWIC / Data.gov.in with caching & fallback).
 - [ ] **Milestone 9**: AI Reasoning Layer (LLM integration for structured incident summaries).
 - [ ] **Milestone 10**: End-to-End integration, demo scenario trigger API, and end-to-end test suite.

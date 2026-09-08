@@ -10,6 +10,7 @@ from app.schemas.observability import (
     NetworkObservabilitySummarySchema,
     VirtualSensorCandidateSchema
 )
+from app.schemas.incident import IncidentResultSchema, CandidateSegmentScoreSchema
 
 __all__ = [
     "ZoneSchema",
@@ -30,5 +31,7 @@ __all__ = [
     "AnomalyResultSchema",
     "SegmentObservabilitySchema",
     "NetworkObservabilitySummarySchema",
-    "VirtualSensorCandidateSchema"
+    "VirtualSensorCandidateSchema",
+    "IncidentResultSchema",
+    "CandidateSegmentScoreSchema"
 ]

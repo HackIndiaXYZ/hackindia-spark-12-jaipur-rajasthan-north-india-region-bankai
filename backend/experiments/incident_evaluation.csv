@@ -1,0 +1,6 @@
+scenario,incident_created,incident_type,localized_segment,ground_truth_segment,localization_correct,confidence,severity,estimated_flow_loss_lpm,estimated_volume_loss_liters
+NORMAL OPERATION,False,NONE,NONE,None,True,0.0,NONE,0.0,0.0
+GRADUAL LEAK,True,LEAK_SUSPECTED,B2-B3,B2-B3,True,0.8788968799435642,CRITICAL,30.94,1082.85
+SUDDEN BURST,True,BURST_EVENT,B1-B2,B2-B3,False,0.9131036263351316,CRITICAL,30.11,1325.05
+SENSOR FAULT,False,NONE,NONE,None,True,0.0,NONE,0.0,0.0
+MULTIPLE ANOMALIES,True,BURST_EVENT,B2-B3,B2-B3,True,0.9282358334796741,CRITICAL,27.82,1223.86
