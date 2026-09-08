@@ -8,7 +8,10 @@ import {
   SensorReading
 } from "@/types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
+const rawBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
+const API_BASE_URL = rawBaseUrl.endsWith("/api")
+  ? rawBaseUrl.replace(/\/+$/, "")
+  : `${rawBaseUrl.replace(/\/+$/, "")}/api`;
 
 export async function checkBackendHealth(): Promise<boolean> {
   try {
