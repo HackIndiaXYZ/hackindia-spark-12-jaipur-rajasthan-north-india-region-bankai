@@ -11,7 +11,7 @@ from app.models.incident import IncidentResult, IncidentStatus, IncidentSeverity
 def test_incident_db_creation_and_retrieval(db_session):
     service = IncidentService()
     simulator = SensorSimulator()
-    readings = simulator.generate_readings(SimulationConfig(scenario_type="gradual_leak", seed=42))
+    readings = simulator.generate_readings(SimulationConfig(scenario_type="gradual_leak", seed=101))
 
     inc = service.process_and_persist_telemetry(readings, db=db_session)
     assert inc is not None
@@ -28,7 +28,7 @@ def test_incident_db_creation_and_retrieval(db_session):
 def test_incident_status_lifecycle_transitions(db_session):
     service = IncidentService()
     simulator = SensorSimulator()
-    readings = simulator.generate_readings(SimulationConfig(scenario_type="sudden_burst", seed=42))
+    readings = simulator.generate_readings(SimulationConfig(scenario_type="sudden_burst", seed=102))
 
     inc = service.process_and_persist_telemetry(readings, db=db_session)
     assert inc is not None
@@ -50,7 +50,7 @@ def test_incident_status_lifecycle_transitions(db_session):
 def test_idempotent_deduplication(db_session):
     service = IncidentService()
     simulator = SensorSimulator()
-    readings = simulator.generate_readings(SimulationConfig(scenario_type="gradual_leak", seed=42))
+    readings = simulator.generate_readings(SimulationConfig(scenario_type="gradual_leak", seed=103))
 
     # First submission creates incident
     inc1 = service.process_and_persist_telemetry(readings, db=db_session)
@@ -64,7 +64,7 @@ def test_idempotent_deduplication(db_session):
 
 def test_incidents_api_endpoints(client: TestClient, db_session):
     simulator = SensorSimulator()
-    readings = simulator.generate_readings(SimulationConfig(scenario_type="sudden_burst", seed=42))
+    readings = simulator.generate_readings(SimulationConfig(scenario_type="sudden_burst", seed=104))
     payload = [r.to_dict() for r in readings]
 
     # 1. POST /api/incidents/analyze
@@ -93,3 +93,4 @@ def test_incidents_api_endpoints(client: TestClient, db_session):
     # 5. Invalid PATCH -> HTTP 400
     res_invalid_patch = client.patch(f"/api/incidents/{inc_id}/status", json={"status": "OPEN"})
     assert res_invalid_patch.status_code == 400
+

@@ -137,6 +137,17 @@ python -m uvicorn app.main:app --reload --port 8000
 ```
 - Interactive OpenAPI Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 - POST Incident Analysis Endpoint: `http://localhost:8000/api/incidents/analyze`
+- GET Government Data Context Endpoints: `http://localhost:8000/api/data-sources`
+
+---
+
+## 🏛️ Government Data Context & Calibration
+
+AquaSentinel integrates local NWDP / Rajasthan surface water telemetry datasets (Rainfall Telemetry CSVs, Mahi Head Regulator Canal Discharge JSON, Bisalpur Reservoir Discharge JSON) as contextual and calibration data:
+
+- **Offline-First & Reliable**: Datasets operate 100% locally without external API dependencies or startup network calls.
+- **Contextual Scope**: NWDP data represents regional hydrology (e.g. rainfall, canal/reservoir discharge) for regional context and calibration only. It is **not** direct pipeline leak sensor telemetry.
+- **API Availability**: Accessible via `/api/data-sources`, `/api/data-sources/{id}`, `/api/data-sources/{id}/summary`, and `/api/data-sources/{id}/recent`.
 
 ---
 
@@ -147,8 +158,9 @@ python -m uvicorn app.main:app --reload --port 8000
 - [x] **Milestone 3**: Anomaly Detection Engine (rolling statistics, z-score, Isolation Forest).
 - [x] **Milestone 4**: Network Observability & Blind-Spot Intelligence (observability scores, virtual sensor placement engine).
 - [x] **Milestone 5**: Leak Detection, Localization & Loss Estimator (topology-aware localization, flow/volume loss estimation, confidence & severity scoring).
-- [ ] **Milestone 6**: Incident Management & Persistence Lifecycle.
-- [ ] **Milestone 7**: Complete REST API Endpoints.
-- [ ] **Milestone 8**: External Government Water Data Adapters (NWIC / Data.gov.in with caching & fallback).
+- [x] **Milestone 6**: Incident Management & Persistence Lifecycle (Database ORM persistence, idempotency fingerprinting, status transitions).
+- [x] **Milestone 7**: Government Data Context & Calibration Layer (Offline Rajasthan NWDP loader, statistical summaries, provenance metadata, read-only API).
+- [ ] **Milestone 8**: External Government Water Data Adapters (Live fallback adapters).
 - [ ] **Milestone 9**: AI Reasoning Layer (LLM integration for structured incident summaries).
 - [ ] **Milestone 10**: End-to-End integration, demo scenario trigger API, and end-to-end test suite.
+

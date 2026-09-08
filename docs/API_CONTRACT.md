@@ -129,3 +129,81 @@ Updates the lifecycle status of an existing incident.
   - `200 OK`: Updated `IncidentResultSchema`
   - `400 Bad Request`: `{"detail": "Invalid status transition from 'RESOLVED' to 'OPEN'."}`
   - `404 Not Found`: `{"detail": "Incident 'INC-999' not found."}`
+
+---
+
+## 4. Government Data Context Endpoints
+
+> [!NOTE]
+> The endpoints below expose external regional surface water data (NWDP / Rajasthan telemetry datasets) for regional context and calibration only. They do NOT represent direct pipeline leak telemetry or trigger automated leak alerts.
+
+### 1. `GET /api/data-sources`
+Lists available government surface water telemetry datasets.
+
+- **HTTP Method**: `GET`
+- **Path**: `/api/data-sources`
+- **Response**: `200 OK`
+  ```json
+  {
+    "sources": [
+      {
+        "source_id": "rajasthan_rainfall_telemetry",
+        "dataset_name": "Rajasthan Surface Water Telemetry Hourly Rainfall",
+        "agency": "Rajasthan Surface Water Department",
+        "source_organization": "National Water Data Portals / India WRIS",
+        "geography": "Rajasthan, India",
+        "data_frequency": "Hourly",
+        "start_date": "2021-10-17 07:00",
+        "end_date": "2030-01-01 08:00",
+        "format": "CSV",
+        "local_file": "rainfall_tel_hr_rajasthan_sw_rj_2021_2025.csv",
+        "source_type": "GOVERNMENT_TELEMETRY",
+        "description": "Hourly regional rainfall telemetry observations from rain stations across Rajasthan.",
+        "unit": "mm",
+        "zone": null
+      }
+    ],
+    "total_count": 3
+  }
+  ```
+
+### 2. `GET /api/data-sources/{source_id}`
+Retrieves metadata for a specific government dataset.
+
+- **HTTP Method**: `GET`
+- **Path**: `/api/data-sources/{source_id}`
+- **Response**: `200 OK` (Single `DataSourceResponse` object) or `404 Not Found`
+
+### 3. `GET /api/data-sources/{source_id}/summary`
+Retrieves statistical summary, coverage dates, and historical calibration metrics.
+
+- **HTTP Method**: `GET`
+- **Path**: `/api/data-sources/{source_id}/summary`
+- **Response**: `200 OK`
+  ```json
+  {
+    "source_id": "rajasthan_rainfall_telemetry",
+    "latest_timestamp": "2026-01-01 08:00",
+    "latest_value": 0.5,
+    "unit": "mm",
+    "min_value": 0.0,
+    "max_value": 420.0,
+    "mean_value": 2.451,
+    "median_value": 0.5,
+    "observation_count": 143464,
+    "missing_value_count": 0,
+    "coverage_start": "2021-10-17 07:00",
+    "coverage_end": "2026-01-01 08:00",
+    "historical_mean_deviation": -1.951
+  }
+  ```
+
+### 4. `GET /api/data-sources/{source_id}/recent`
+Retrieves a bounded list of recent observations for a dataset.
+
+- **HTTP Method**: `GET`
+- **Path**: `/api/data-sources/{source_id}/recent?limit=50`
+- **Query Parameters**:
+  - `limit` *(optional)*: Integer between 1 and 500 (default 50).
+- **Response**: `200 OK` (`ObservationListResponse`)
+

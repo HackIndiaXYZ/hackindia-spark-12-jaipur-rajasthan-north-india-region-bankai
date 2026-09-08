@@ -11,6 +11,13 @@ from app.schemas.observability import (
     VirtualSensorCandidateSchema
 )
 from app.schemas.incident import IncidentResultSchema, CandidateSegmentScoreSchema, IncidentStatusUpdateSchema
+from app.schemas.data_source import (
+    DataSourceResponse,
+    DataSourceListResponse,
+    DataSourceSummaryResponse,
+    ObservationResponse,
+    ObservationListResponse
+)
 
 __all__ = [
     "ZoneSchema",
@@ -34,5 +41,11 @@ __all__ = [
     "VirtualSensorCandidateSchema",
     "IncidentResultSchema",
     "CandidateSegmentScoreSchema",
-    "IncidentStatusUpdateSchema"
+    "IncidentStatusUpdateSchema",
+    "DataSourceResponse",
+    "DataSourceListResponse",
+    "DataSourceSummaryResponse",
+    "ObservationResponse",
+    "ObservationListResponse"
 ]
+
