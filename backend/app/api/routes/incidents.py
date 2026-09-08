@@ -4,6 +4,7 @@ from typing import List, Optional
 
 from app.schemas.reading import SensorReadingSchema
 from app.schemas.incident import IncidentResultSchema, IncidentStatusUpdateSchema
+from app.schemas.ai_analysis import AIAnalysisResponse
 from app.models.reading import SensorReading
 from app.models.incident import IncidentResult, CandidateSegmentScore
 from app.services.incident_service import IncidentService
@@ -124,3 +125,26 @@ def update_incident_status(
         raise HTTPException(status_code=404, detail=str(e))
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/{incident_id}/ai-analysis", response_model=AIAnalysisResponse)
+def get_ai_analysis_for_incident(
+    incident_id: str,
+    force_refresh: bool = Query(False, description="Force refresh AI analysis bypassing cache"),
+    db: Session = Depends(get_db)
+):
+    """
+    Generates or retrieves server-side grounded AI explainability analysis for a persisted incident.
+    Returns structured analysis matching AIAnalysisResponse schema.
+    """
+    from app.services.ai_service import AIAnalysisService
+    ai_service = AIAnalysisService()
+
+    model = IncidentRepository.get_by_id(db=db, incident_id=incident_id)
+    if not model:
+        # If model not found in DB, check if demo/synthetic incident ID or raise 404
+        raise HTTPException(status_code=404, detail=f"Incident '{incident_id}' not found.")
+
+    incident_dict = _model_to_schema(model).model_dump()
+    return ai_service.analyze_incident(incident_dict, force_refresh=force_refresh)
+

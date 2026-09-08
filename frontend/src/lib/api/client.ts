@@ -103,3 +103,23 @@ export async function getRecentObservations(
   if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch recent observations for ${sourceId}`);
   return res.json();
 }
+
+export async function getAIAnalysis(incidentId: string): Promise<{
+  incident_id: string;
+  analysis: {
+    summary: string;
+    why_detected: string[];
+    recommended_actions: string[];
+    confidence_note: string;
+    limitations: string;
+  };
+  provider: string;
+}> {
+  const res = await fetch(`${API_BASE_URL}/incidents/${incidentId}/ai-analysis`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" }
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch AI analysis for ${incidentId}`);
+  return res.json();
+}
+

@@ -138,16 +138,18 @@ python -m uvicorn app.main:app --reload --port 8000
 - Interactive OpenAPI Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 - POST Incident Analysis Endpoint: `http://localhost:8000/api/incidents/analyze`
 - GET Government Data Context Endpoints: `http://localhost:8000/api/data-sources`
+- POST AI Analysis Endpoint: `http://localhost:8000/api/incidents/{id}/ai-analysis`
 
 ---
 
-## 🏛️ Government Data Context & Calibration
+## 🤖 Grounded Gemini AI Analysis & Response Intelligence
 
-AquaSentinel integrates local NWDP / Rajasthan surface water telemetry datasets (Rainfall Telemetry CSVs, Mahi Head Regulator Canal Discharge JSON, Bisalpur Reservoir Discharge JSON) as contextual and calibration data:
+AquaSentinel incorporates a server-side **Google Gemini AI** explainability service (`google-genai` SDK):
 
-- **Offline-First & Reliable**: Datasets operate 100% locally without external API dependencies or startup network calls.
-- **Contextual Scope**: NWDP data represents regional hydrology (e.g. rainfall, canal/reservoir discharge) for regional context and calibration only. It is **not** direct pipeline leak sensor telemetry.
-- **API Availability**: Accessible via `/api/data-sources`, `/api/data-sources/{id}`, `/api/data-sources/{id}/summary`, and `/api/data-sources/{id}/recent`.
+- **Grounded Explainability**: Gemini provides AI-assisted explanation and response guidance over pre-computed, structured AquaSentinel evidence. It is **not** the primary incident detection or localization engine.
+- **Server-Side Security**: API keys (`GEMINI_API_KEY`) are managed 100% server-side and never exposed to browser code.
+- **Structured JSON Validation**: Enforces Pydantic schema validation (`AIAnalysisResult`) on all generated outputs.
+- **Safe Fallback**: Automatically switches to a deterministic grounded fallback (`provider: "deterministic_fallback"`) if API key is missing or network/quota errors occur.
 
 ---
 
@@ -160,7 +162,7 @@ AquaSentinel integrates local NWDP / Rajasthan surface water telemetry datasets 
 - [x] **Milestone 5**: Leak Detection, Localization & Loss Estimator (topology-aware localization, flow/volume loss estimation, confidence & severity scoring).
 - [x] **Milestone 6**: Incident Management & Persistence Lifecycle (Database ORM persistence, idempotency fingerprinting, status transitions).
 - [x] **Milestone 7**: Government Data Context & Calibration Layer (Offline Rajasthan NWDP loader, statistical summaries, provenance metadata, read-only API).
-- [ ] **Milestone 8**: External Government Water Data Adapters (Live fallback adapters).
-- [ ] **Milestone 9**: AI Reasoning Layer (LLM integration for structured incident summaries).
+- [x] **Milestone 9**: Grounded Gemini AI Analysis & Response Intelligence (Server-side Gemini 2.5 Flash SDK, JSON schema validation, safe deterministic fallback).
 - [ ] **Milestone 10**: End-to-End integration, demo scenario trigger API, and end-to-end test suite.
+
 

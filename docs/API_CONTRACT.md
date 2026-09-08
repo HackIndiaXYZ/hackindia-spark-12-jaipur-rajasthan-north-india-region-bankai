@@ -207,3 +207,43 @@ Retrieves a bounded list of recent observations for a dataset.
   - `limit` *(optional)*: Integer between 1 and 500 (default 50).
 - **Response**: `200 OK` (`ObservationListResponse`)
 
+---
+
+## 5. AI Reasoning & Response Intelligence Endpoints
+
+> [!NOTE]
+> Gemini AI is server-side and provides explainability over pre-computed AquaSentinel evidence. It is NOT the primary incident detection or localization engine.
+
+### 1. `POST /api/incidents/{incident_id}/ai-analysis`
+Generates or retrieves cached grounded AI explainability analysis for a persisted incident.
+
+- **HTTP Method**: `POST`
+- **Path**: `/api/incidents/{incident_id}/ai-analysis`
+- **Query Parameters**:
+  - `force_refresh` *(optional)*: Boolean (default `false`).
+- **Response**: `200 OK` (`AIAnalysisResponse`)
+  ```json
+  {
+    "incident_id": "INC-B2B3-LEAK",
+    "analysis": {
+      "summary": "Suspected water leak localized to pipeline segment B2-B3 in Zone_B.",
+      "why_detected": [
+        "Correlated pressure drop (-0.68 bar) detected across responsive sensors B2 and B3.",
+        "Net flow discrepancy of 30.94 LPM measured between B2 downstream flow and B3 intake.",
+        "Topology agreement score: 0.897 across responsive sensors in Zone_B."
+      ],
+      "recommended_actions": [
+        "Dispatch field maintenance team to inspect pipeline segment B2-B3 in Zone_B.",
+        "Check downstream pressure at node B3 and isolate isolation valve V-B2 if flow loss escalates.",
+        "Acknowledge incident in control console to record operator dispatch."
+      ],
+      "confidence_note": "87.9% confidence score based on multi-signal correlation and topology graph agreement.",
+      "limitations": "Loss estimates (30.94 LPM / 1082.8 L) are model-derived simulation estimates intended for demonstration and system evaluation."
+    },
+    "provider": "gemini"
+  }
+  ```
+- **Error Responses**:
+  - `404 Not Found`: `{"detail": "Incident 'INC-999' not found."}`
+
+

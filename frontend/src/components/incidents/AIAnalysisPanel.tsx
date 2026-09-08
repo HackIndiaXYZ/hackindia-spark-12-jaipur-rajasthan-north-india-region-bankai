@@ -1,23 +1,62 @@
 "use client";
 
-import React from "react";
-import { Sparkles, CheckCircle2, ShieldAlert, HelpCircle, Info } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Sparkles, CheckCircle2, ShieldAlert, HelpCircle, Info, RefreshCw, Cpu } from "lucide-react";
+import { getAIAnalysis } from "@/lib/api/client";
 
 interface AIAnalysisPanelProps {
-  whyDetected: string[];
-  recommendedActions: string[];
-  confidenceNote: string;
-  limitations: string;
+  incidentId?: string;
+  whyDetected?: string[];
+  recommendedActions?: string[];
+  confidenceNote?: string;
+  limitations?: string;
   isSensorFault?: boolean;
+  provider?: string;
 }
 
 export const AIAnalysisPanel: React.FC<AIAnalysisPanelProps> = ({
-  whyDetected,
-  recommendedActions,
-  confidenceNote,
-  limitations,
-  isSensorFault = false
+  incidentId,
+  whyDetected: initialWhy,
+  recommendedActions: initialActions,
+  confidenceNote: initialConfidence,
+  limitations: initialLimitations,
+  isSensorFault = false,
+  provider: initialProvider = "gemini"
 }) => {
+  const [loading, setLoading] = useState<boolean>(false);
+  const [whyDetected, setWhyDetected] = useState<string[]>(initialWhy || []);
+  const [recommendedActions, setRecommendedActions] = useState<string[]>(initialActions || []);
+  const [confidenceNote, setConfidenceNote] = useState<string>(initialConfidence || "");
+  const [limitations, setLimitations] = useState<string>(initialLimitations || "");
+  const [provider, setProvider] = useState<string>(initialProvider);
+
+  // Sync props if initial props change
+  useEffect(() => {
+    if (initialWhy) setWhyDetected(initialWhy);
+    if (initialActions) setRecommendedActions(initialActions);
+    if (initialConfidence) setConfidenceNote(initialConfidence);
+    if (initialLimitations) setLimitations(initialLimitations);
+    if (initialProvider) setProvider(initialProvider);
+  }, [initialWhy, initialActions, initialConfidence, initialLimitations, initialProvider]);
+
+  // Request AI analysis explicitly when requested or incidentId changes
+  const fetchAIAnalysis = async () => {
+    if (!incidentId) return;
+    setLoading(true);
+    try {
+      const res = await getAIAnalysis(incidentId);
+      setWhyDetected(res.analysis.why_detected);
+      setRecommendedActions(res.analysis.recommended_actions);
+      setConfidenceNote(res.analysis.confidence_note);
+      setLimitations(res.analysis.limitations);
+      setProvider(res.provider);
+    } catch (err) {
+      console.warn("Failed to fetch real AI analysis, using provided state:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="bg-[#0f172a] border border-cyan-500/30 rounded-xl p-5 shadow-lg relative overflow-hidden">
       {/* Decorative Cyan Accent Corner */}
@@ -31,12 +70,31 @@ export const AIAnalysisPanel: React.FC<AIAnalysisPanelProps> = ({
           </div>
           <div>
             <h3 className="font-bold text-white text-base">AI Incident Analysis & Guidance</h3>
-            <p className="text-xs text-slate-400">Contextual evidence interpretation & operator decision support</p>
+            <p className="text-xs text-slate-400">Grounded evidence interpretation & operator decision support</p>
           </div>
         </div>
-        <span className="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-800 px-2.5 py-1 rounded-full font-mono font-semibold">
-          AI EXPLAINABILITY ENGINE
-        </span>
+
+        <div className="flex items-center gap-2">
+          {incidentId && (
+            <button
+              onClick={fetchAIAnalysis}
+              disabled={loading}
+              className="inline-flex items-center gap-1 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1 rounded border border-slate-700 transition"
+              title="Request Fresh AI Analysis"
+            >
+              <RefreshCw className={`w-3 h-3 text-cyan-400 ${loading ? "animate-spin" : ""}`} />
+              <span>{loading ? "Analyzing..." : "Analyze"}</span>
+            </button>
+          )}
+
+          <span className={`text-[10px] px-2.5 py-1 rounded-full font-mono font-semibold border ${
+            provider === "gemini"
+              ? "bg-cyan-950 text-cyan-300 border-cyan-800"
+              : "bg-slate-800 text-slate-300 border-slate-700"
+          }`}>
+            {provider === "gemini" ? "✨ GEMINI 2.5 FLASH AI" : "⚙️ DETERMINISTIC FALLBACK"}
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

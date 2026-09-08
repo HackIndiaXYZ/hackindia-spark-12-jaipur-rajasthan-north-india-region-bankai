@@ -195,6 +195,7 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ id: s
 
         {/* AI ANALYSIS PANEL */}
         <AIAnalysisPanel
+          incidentId={incident.incident_id}
           whyDetected={activeState.aiAnalysis.whyDetected}
           recommendedActions={activeState.aiAnalysis.recommendedActions}
           confidenceNote={activeState.aiAnalysis.confidenceNote}

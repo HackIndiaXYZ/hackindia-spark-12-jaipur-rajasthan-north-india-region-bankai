@@ -18,6 +18,7 @@ from app.schemas.data_source import (
     ObservationResponse,
     ObservationListResponse
 )
+from app.schemas.ai_analysis import AIAnalysisResult, AIAnalysisResponse
 
 __all__ = [
     "ZoneSchema",
@@ -46,6 +47,9 @@ __all__ = [
     "DataSourceListResponse",
     "DataSourceSummaryResponse",
     "ObservationResponse",
-    "ObservationListResponse"
+    "ObservationListResponse",
+    "AIAnalysisResult",
+    "AIAnalysisResponse"
 ]
+
 
