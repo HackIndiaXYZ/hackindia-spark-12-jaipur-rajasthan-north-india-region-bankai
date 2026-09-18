@@ -21,70 +21,50 @@ function isCritical(incident: Incident): boolean {
 }
 
 /**
- * Wailing police-siren using Web Audio API.
- *
- * Two oscillators sweep 480 Hz → 960 Hz → 480 Hz continuously
- * (fundamental + a harmonic fifth for richness).
- * One full wail cycle = 0.9 s up + 0.9 s down = 1.8 s.
- * Returns a cleanup function.
+ * Synthesise a repeating alarm tone using Web Audio API.
+ * Returns a cleanup function that stops all oscillators.
  */
 function startAlarmTone(audioCtx: AudioContext): () => void {
   let stopped = false;
   const oscillators: OscillatorNode[] = [];
-  const LOW  = 480;
-  const HIGH = 960;
-  const HALF = 0.9; // seconds for half-sweep (up or down)
 
-  // Master gain (controls overall volume)
-  const masterGain = audioCtx.createGain();
-  masterGain.gain.setValueAtTime(0.35, audioCtx.currentTime);
-  masterGain.connect(audioCtx.destination);
+  // Two-tone siren: alternate between 880 Hz and 1100 Hz every 600 ms
+  const tones = [880, 1100];
+  let idx = 0;
 
-  // Fundamental oscillator
-  const osc1 = audioCtx.createOscillator();
-  osc1.type = "sawtooth"; // richer, more siren-like than sine
-  osc1.frequency.setValueAtTime(LOW, audioCtx.currentTime);
-
-  // Harmonic fifth (+7 semitones ≈ ×1.498) for a full, layered sound
-  const osc2 = audioCtx.createOscillator();
-  osc2.type = "sine";
-  osc2.frequency.setValueAtTime(LOW * 1.5, audioCtx.currentTime);
-
-  // Blend: osc1 at 70 %, osc2 at 30 %
-  const g1 = audioCtx.createGain(); g1.gain.value = 0.7;
-  const g2 = audioCtx.createGain(); g2.gain.value = 0.3;
-
-  osc1.connect(g1); g1.connect(masterGain);
-  osc2.connect(g2); g2.connect(masterGain);
-
-  osc1.start();
-  osc2.start();
-  oscillators.push(osc1, osc2);
-
-  // Schedule infinite sweep cycles
-  function scheduleSweeps(startTime: number) {
+  function playNextTone() {
     if (stopped) return;
 
-    // UP sweep: LOW → HIGH over HALF seconds
-    osc1.frequency.exponentialRampToValueAtTime(HIGH,        startTime + HALF);
-    osc2.frequency.exponentialRampToValueAtTime(HIGH * 1.5,  startTime + HALF);
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
 
-    // DOWN sweep: HIGH → LOW over next HALF seconds
-    osc1.frequency.exponentialRampToValueAtTime(LOW,         startTime + HALF * 2);
-    osc2.frequency.exponentialRampToValueAtTime(LOW  * 1.5,  startTime + HALF * 2);
+    osc.type = "sine";
+    osc.frequency.value = tones[idx % 2];
+    idx++;
 
-    // Queue the next pair of sweeps just before the current one ends
-    setTimeout(() => scheduleSweeps(audioCtx.currentTime), (HALF * 2 - 0.05) * 1000);
+    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.05);
+    gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.5);
+    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.6);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start(audioCtx.currentTime);
+    osc.stop(audioCtx.currentTime + 0.6);
+    oscillators.push(osc);
+
+    // Schedule the next tone
+    setTimeout(playNextTone, 650);
   }
 
-  scheduleSweeps(audioCtx.currentTime);
+  playNextTone();
 
   return () => {
     stopped = true;
     oscillators.forEach((o) => {
       try { o.stop(); } catch { /* already stopped */ }
     });
-    try { masterGain.disconnect(); } catch { /* ignore */ }
   };
 }
 
