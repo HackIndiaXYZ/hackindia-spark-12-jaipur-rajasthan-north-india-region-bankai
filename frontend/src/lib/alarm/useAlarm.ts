@@ -4,9 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Incident } from "@/types";
 
 /**
- * Incidents that warrant an audible alarm.
- * BURST_EVENT is always critical.
- * LEAK_SUSPECTED only when severity is HIGH or CRITICAL.
+ * Incidents that warrant an audible alarm in simulation mode.
  */
 function isCritical(incident: Incident): boolean {
   if (incident.status !== "OPEN") return false;
@@ -21,126 +19,167 @@ function isCritical(incident: Incident): boolean {
 }
 
 /**
- * Synthesise a repeating alarm tone using Web Audio API.
- * Returns a cleanup function that stops all oscillators.
+ * Synthesizes repeating alarm tone using Web Audio API.
+ * Pattern: 2500 Hz tone for 200 ms, 100 ms silence, repeat while ALERT remains active.
  */
 function startAlarmTone(audioCtx: AudioContext): () => void {
   let stopped = false;
-  const oscillators: OscillatorNode[] = [];
+  let timerId: any = null;
 
-  // Two-tone siren: alternate between 880 Hz and 1100 Hz every 600 ms
-  const tones = [880, 1100];
-  let idx = 0;
-
-  function playNextTone() {
+  function playPulse() {
     if (stopped) return;
 
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+    try {
+      if (audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
 
-    osc.type = "sine";
-    osc.frequency.value = tones[idx % 2];
-    idx++;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
 
-    gain.gain.setValueAtTime(0, audioCtx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.05);
-    gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.5);
-    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.6);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(2500, audioCtx.currentTime); // 2500 Hz tone
 
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
+      // Envelope: sharp start for 200 ms
+      gain.gain.setValueAtTime(0, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.02);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime + 0.18);
+      gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.20);
 
-    osc.start(audioCtx.currentTime);
-    osc.stop(audioCtx.currentTime + 0.6);
-    oscillators.push(osc);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
 
-    // Schedule the next tone
-    setTimeout(playNextTone, 650);
+      osc.start(audioCtx.currentTime);
+      osc.stop(audioCtx.currentTime + 0.20); // 200 ms tone
+
+      // Schedule next pulse: 200 ms tone + 100 ms silence = 300 ms cycle
+      timerId = setTimeout(playPulse, 300);
+    } catch (err) {
+      console.warn("[AUDIO] Web Audio playback warning:", err);
+    }
   }
 
-  playNextTone();
+  playPulse();
 
   return () => {
     stopped = true;
-    oscillators.forEach((o) => {
-      try { o.stop(); } catch { /* already stopped */ }
-    });
+    if (timerId) clearTimeout(timerId);
   };
 }
 
 export interface AlarmState {
   isAlarming: boolean;
+  isAudioUnlocked: boolean;
+  isHardwareAlertActive: boolean;
   criticalIncidents: Incident[];
   stopAlarm: () => void;
+  unlockAudio: () => void;
 }
 
 /**
- * Watches the incident list and fires an alarm whenever a NEW critical
- * incident appears that was not previously seen.
- * Alarm is silenced by calling stopAlarm().
- * The alarm does NOT auto-restart for an incident that was already silenced.
+ * Custom hook to manage laptop Web Audio alarm for both live ESP32 hardware telemetry and simulation incidents.
  */
-export function useAlarm(incidents: Incident[]): AlarmState {
+export function useAlarm(
+  incidents: Incident[] = [],
+  isHardwareLive: boolean = false,
+  hardwareStatus: string = "NORMAL",
+  rawValue: number = 0,
+  threshold: number = 50
+): AlarmState {
   const [isAlarming, setIsAlarming] = useState(false);
+  const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
   const [criticalIncidents, setCriticalIncidents] = useState<Incident[]>([]);
 
-  // IDs of incidents we've already alarmed for (or that were silenced)
-  const seenIds = useRef<Set<string>>(new Set());
-  // IDs the user explicitly stopped the alarm for
-  const silencedIds = useRef<Set<string>>(new Set());
+  // User mute tracking
+  const userMutedHardwareRef = useRef(false);
+  const silencedIncidentIds = useRef<Set<string>>(new Set());
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const stopToneRef = useRef<(() => void) | null>(null);
 
+  // Initialize & Unlock AudioContext
+  const unlockAudio = useCallback(() => {
+    if (!audioCtxRef.current) {
+      const AudioContextClass =
+        window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      audioCtxRef.current = new AudioContextClass();
+    }
+
+    if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
+      audioCtxRef.current.resume().then(() => {
+        setIsAudioUnlocked(true);
+      });
+    } else {
+      setIsAudioUnlocked(true);
+    }
+  }, []);
+
+  // Listen for initial user interaction to unlock audio automatically
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      unlockAudio();
+      window.removeEventListener("click", handleFirstInteraction);
+      window.removeEventListener("keydown", handleFirstInteraction);
+    };
+
+    window.addEventListener("click", handleFirstInteraction);
+    window.addEventListener("keydown", handleFirstInteraction);
+
+    return () => {
+      window.removeEventListener("click", handleFirstInteraction);
+      window.removeEventListener("keydown", handleFirstInteraction);
+    };
+  }, [unlockAudio]);
+
+  // Stop alarm callback (Mute laptop audio only — does not touch physical ESP32 buzzer)
   const stopAlarm = useCallback(() => {
     if (stopToneRef.current) {
       stopToneRef.current();
       stopToneRef.current = null;
     }
-    // Mark all currently critical incidents as silenced
-    criticalIncidents.forEach((inc) => silencedIds.current.add(inc.incident_id));
-    setIsAlarming(false);
-    setCriticalIncidents([]);
-  }, [criticalIncidents]);
 
-  useEffect(() => {
-    const newCritical = incidents.filter(
-      (inc) =>
-        isCritical(inc) &&
-        !silencedIds.current.has(inc.incident_id)
-    );
-
-    // Detect truly new (not-yet-alarmed) critical incidents
-    const brandNew = newCritical.filter(
-      (inc) => !seenIds.current.has(inc.incident_id)
-    );
-
-    // Track all critical we've evaluated so we don't re-trigger
-    newCritical.forEach((inc) => seenIds.current.add(inc.incident_id));
-
-    if (brandNew.length > 0) {
-      // Start the alarm
-      setCriticalIncidents(newCritical);
-      setIsAlarming(true);
-
-      // Lazy-init AudioContext (must be created after a user gesture has
-      // happened; browsers allow it after the first interaction).
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new (window.AudioContext ||
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (window as any).webkitAudioContext)();
-      }
-
-      // Stop any existing tone first
-      if (stopToneRef.current) {
-        stopToneRef.current();
-      }
-
-      stopToneRef.current = startAlarmTone(audioCtxRef.current);
+    if (isHardwareLive && hardwareStatus === "ALERT") {
+      userMutedHardwareRef.current = true;
     }
 
-    // If all critical incidents have been resolved/acked externally, stop alarm
-    if (isAlarming && newCritical.length === 0) {
+    criticalIncidents.forEach((inc) => silencedIncidentIds.current.add(inc.incident_id));
+
+    setIsAlarming(false);
+  }, [isHardwareLive, hardwareStatus, criticalIncidents]);
+
+  // Main evaluation effect
+  useEffect(() => {
+    const isHardwareAlert =
+      isHardwareLive && hardwareStatus === "ALERT" && rawValue >= threshold;
+
+    // Reset user mute when hardware alert ends
+    if (!isHardwareAlert) {
+      userMutedHardwareRef.current = false;
+    }
+
+    const unMutedHardware = isHardwareAlert && !userMutedHardwareRef.current;
+
+    const newCriticalIncidents = incidents.filter(
+      (inc) => isCritical(inc) && !silencedIncidentIds.current.has(inc.incident_id)
+    );
+
+    const shouldAlarmBeActive = unMutedHardware || newCriticalIncidents.length > 0;
+
+    if (shouldAlarmBeActive) {
+      setCriticalIncidents(newCriticalIncidents);
+      setIsAlarming(true);
+
+      // Lazy-init AudioContext if needed
+      if (!audioCtxRef.current) {
+        unlockAudio();
+      }
+
+      // Ensure single active oscillator loop
+      if (!stopToneRef.current && audioCtxRef.current) {
+        stopToneRef.current = startAlarmTone(audioCtxRef.current);
+      }
+    } else {
+      // Stop tone when status returns to NORMAL or hardware disconnects
       if (stopToneRef.current) {
         stopToneRef.current();
         stopToneRef.current = null;
@@ -148,15 +187,24 @@ export function useAlarm(incidents: Incident[]): AlarmState {
       setIsAlarming(false);
       setCriticalIncidents([]);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [incidents]);
+  }, [incidents, isHardwareLive, hardwareStatus, rawValue, threshold, unlockAudio]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (stopToneRef.current) stopToneRef.current();
+      if (stopToneRef.current) {
+        stopToneRef.current();
+        stopToneRef.current = null;
+      }
     };
   }, []);
 
-  return { isAlarming, criticalIncidents, stopAlarm };
+  return {
+    isAlarming,
+    isAudioUnlocked,
+    isHardwareAlertActive: isHardwareLive && hardwareStatus === "ALERT",
+    criticalIncidents,
+    stopAlarm,
+    unlockAudio,
+  };
 }

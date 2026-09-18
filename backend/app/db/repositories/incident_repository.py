@@ -83,12 +83,13 @@ class IncidentRepository:
     ) -> List[IncidentModel]:
         query = db.query(IncidentModel)
 
-        if status:
+        if status and isinstance(status, str) and status.upper() != "ALL":
             query = query.filter(IncidentModel.status == status.upper())
-        if severity:
+        if severity and isinstance(severity, str) and severity.upper() != "ALL":
             query = query.filter(IncidentModel.severity == severity.upper())
 
         return query.order_by(IncidentModel.detected_at.desc()).offset(offset).limit(limit).all()
+
 
     @staticmethod
     def update_status(db: Session, incident_id: str, new_status_str: str) -> IncidentModel:
@@ -109,8 +110,16 @@ class IncidentRepository:
                 raise ValueError(f"Invalid status transition from '{current_status.value}' to '{new_status.value}'.")
 
             model.status = new_status.value
-            model.updated_at = datetime.utcnow()
+            now_utc = datetime.now(timezone.utc)
+            model.updated_at = now_utc
+
+            if new_status == IncidentStatus.ACKNOWLEDGED:
+                model.acknowledged_at = now_utc
+            elif new_status == IncidentStatus.RESOLVED:
+                model.resolved_at = now_utc
+
             db.commit()
             db.refresh(model)
+
 
         return model

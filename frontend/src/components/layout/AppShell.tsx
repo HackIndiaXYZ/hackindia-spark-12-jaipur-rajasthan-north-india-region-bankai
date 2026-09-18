@@ -22,9 +22,16 @@ import { ScenarioType } from "@/types";
 
 export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathname = usePathname();
-  const { scenario, setScenario, isBackendLive, isDemoMode, setIsDemoMode, incidents } = useDemo();
-  const { isAlarming, criticalIncidents, stopAlarm } = useAlarm(incidents);
+  const { scenario, setScenario, isBackendLive, isDemoMode, setIsDemoMode, incidents, isHardwareLive, hardwareState } = useDemo();
+  const { isAlarming, isAudioUnlocked, criticalIncidents, stopAlarm, unlockAudio } = useAlarm(
+    incidents,
+    isHardwareLive,
+    hardwareState.telemetry?.status || "NORMAL",
+    hardwareState.telemetry?.raw_value || 0,
+    hardwareState.telemetry?.threshold || 50
+  );
   const [utcTime, setUtcTime] = useState<string>("");
+
 
   useEffect(() => {
     const updateTime = () => {
@@ -180,8 +187,18 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
         {/* Critical Incident Alarm Banner */}
         {isAlarming && (
-          <AlarmBanner incidents={criticalIncidents} onStop={stopAlarm} />
+          <AlarmBanner
+            isHardwareAlert={isHardwareLive && hardwareState.telemetry?.status === "ALERT"}
+            raw_value={hardwareState.telemetry?.raw_value}
+            threshold={hardwareState.telemetry?.threshold}
+            pressure_equivalent={hardwareState.telemetry?.pressure_equivalent}
+            incidents={criticalIncidents}
+            isAudioUnlocked={isAudioUnlocked}
+            onUnlockAudio={unlockAudio}
+            onStop={stopAlarm}
+          />
         )}
+
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto bg-[#0b0f19]">{children}</main>

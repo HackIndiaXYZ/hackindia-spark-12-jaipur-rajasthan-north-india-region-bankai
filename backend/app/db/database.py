@@ -28,4 +28,25 @@ def get_db():
 
 
 def init_db():
+    from sqlalchemy import inspect, text
+    import app.db.models  # Ensures all ORM models are registered on Base.metadata
     Base.metadata.create_all(bind=engine)
+
+    inspector = inspect(engine)
+    if "incidents" in inspector.get_table_names():
+        existing_cols = {col["name"] for col in inspector.get_columns("incidents")}
+        columns_to_add = [
+            ("candidate_segments", "JSON"),
+            ("responsive_sensors", "JSON"),
+            ("acknowledged_at", "DATETIME"),
+            ("resolved_at", "DATETIME"),
+            ("peak_raw_adc", "INTEGER"),
+            ("peak_pressure_equivalent", "FLOAT"),
+            ("source", "VARCHAR DEFAULT 'LIVE HARDWARE'"),
+            ("disclaimer", "TEXT")
+        ]
+        with engine.begin() as conn:
+            for col_name, col_type in columns_to_add:
+                if col_name not in existing_cols:
+                    conn.execute(text(f"ALTER TABLE incidents ADD COLUMN {col_name} {col_type}"))
+

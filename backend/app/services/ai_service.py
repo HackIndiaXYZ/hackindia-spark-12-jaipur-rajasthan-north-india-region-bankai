@@ -40,20 +40,27 @@ class AIAnalysisService:
 
         # Cache check to avoid duplicate API calls
         if not force_refresh and incident_id in self._analysis_cache:
-            logger.info(f"Returning cached AI analysis for incident {incident_id}")
+            logger.info(f"[GEMINI] Returning cached AI analysis for incident {incident_id}")
             return self._analysis_cache[incident_id]
+
+        logger.info(
+            f"[GEMINI] Requesting analysis for incident={incident_id}, type={incident_data.get('incident_type')}, "
+            f"segment={incident_data.get('affected_segment')}, severity={incident_data.get('severity')}, model={self.model_name}"
+        )
 
         # Attempt Gemini AI generation if client is available
         if self._client:
             try:
                 response = self._generate_gemini_analysis(incident_data)
                 if response:
-                  self._analysis_cache[incident_id] = response
-                  return response
+                    logger.info(f"[GEMINI] Response received successfully from Gemini model '{self.model_name}' for incident {incident_id}")
+                    self._analysis_cache[incident_id] = response
+                    return response
             except Exception as e:
-                logger.error(f"Gemini API request failed for incident {incident_id}: {e}. Falling back.")
+                logger.error(f"[GEMINI] Gemini API request failed for incident {incident_id}: {e}. Falling back.")
 
         # Fallback analysis
+        logger.info(f"[GEMINI] Using deterministic fallback analysis for incident {incident_id}")
         fallback = self._generate_fallback_analysis(incident_data)
         self._analysis_cache[incident_id] = fallback
         return fallback

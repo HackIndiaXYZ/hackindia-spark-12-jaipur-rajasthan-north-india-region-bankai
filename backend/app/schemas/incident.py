@@ -28,8 +28,13 @@ class IncidentResultBase(BaseModel):
     estimated_volume_loss_liters: float = Field(..., json_schema_extra={"example": 1356.0})
     candidate_segments: List[CandidateSegmentScoreSchema] = Field(default_factory=list)
     evidence: List[str] = Field(default_factory=list)
-    observability_score: float = Field(0.0, json_schema_extra={"example": 0.89})
+    acknowledged_at: Optional[datetime] = None
+    resolved_at: Optional[datetime] = None
+    peak_raw_adc: Optional[int] = None
+    peak_pressure_equivalent: Optional[float] = None
+    source: Optional[str] = "LIVE HARDWARE"
     disclaimer: str = Field("Loss values are model-derived simulation estimates intended for demonstration and system evaluation.")
+
 
 class IncidentResultSchema(IncidentResultBase):
     id: Optional[int] = None

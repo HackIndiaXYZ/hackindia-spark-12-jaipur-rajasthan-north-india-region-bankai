@@ -35,6 +35,11 @@ def _model_to_schema(model) -> IncidentResultSchema:
         detected_at=model.detected_at,
         created_at=model.created_at,
         updated_at=model.updated_at,
+        acknowledged_at=getattr(model, "acknowledged_at", None),
+        resolved_at=getattr(model, "resolved_at", None),
+        peak_raw_adc=getattr(model, "peak_raw_adc", None),
+        peak_pressure_equivalent=getattr(model, "peak_pressure_equivalent", None),
+        source=getattr(model, "source", "LIVE HARDWARE"),
         detection_delay_min=model.detection_delay_min,
         confidence=model.confidence,
         responsive_sensors=model.responsive_sensors or [],
@@ -45,6 +50,7 @@ def _model_to_schema(model) -> IncidentResultSchema:
         observability_score=model.observability_score,
         disclaimer=model.disclaimer or "Loss values are model-derived simulation estimates intended for demonstration and system evaluation."
     )
+
 
 
 @router.post("/analyze", response_model=Optional[IncidentResultSchema])
@@ -141,10 +147,40 @@ def get_ai_analysis_for_incident(
     ai_service = AIAnalysisService()
 
     model = IncidentRepository.get_by_id(db=db, incident_id=incident_id)
-    if not model:
-        # If model not found in DB, check if demo/synthetic incident ID or raise 404
+    if model:
+        incident_dict = _model_to_schema(model).model_dump()
+    elif incident_id.startswith("INC-DEMO") or any(kw in incident_id.upper() for kw in ["BURST", "LEAK", "FAULT", "NORMAL"]):
+        # Dynamic synthetic incident specs for demo scenario triggers
+        inc_type = "LEAK_SUSPECTED"
+        segment = "B2-B3"
+        sev = "MEDIUM"
+        if "BURST" in incident_id.upper():
+            inc_type = "BURST_SUSPECTED"
+            sev = "CRITICAL"
+        elif "FAULT" in incident_id.upper():
+            inc_type = "SENSOR_FAULT"
+            sev = "HIGH"
+        elif "NORMAL" in incident_id.upper():
+            inc_type = "NORMAL_BASELINE"
+            sev = "LOW"
+            segment = "NONE"
+
+        incident_dict = {
+            "incident_id": incident_id,
+            "incident_type": inc_type,
+            "severity": sev,
+            "affected_segment": segment,
+            "affected_zone": "Zone_B",
+            "confidence": 0.91,
+            "observability_score": 0.89,
+            "estimated_flow_loss_lpm": 104.0 if sev == "CRITICAL" else (0.0 if segment == "NONE" else 32.5),
+            "estimated_volume_loss_liters": 350.0 if sev == "CRITICAL" else 0.0,
+            "evidence": [f"Dynamic telemetry scenario evaluation for {incident_id}"],
+            "responsive_sensors": ["B2", "B3"],
+            "disclaimer": "Loss values are model-derived simulation estimates intended for demonstration."
+        }
+    else:
         raise HTTPException(status_code=404, detail=f"Incident '{incident_id}' not found.")
 
-    incident_dict = _model_to_schema(model).model_dump()
     return ai_service.analyze_incident(incident_dict, force_refresh=force_refresh)
 

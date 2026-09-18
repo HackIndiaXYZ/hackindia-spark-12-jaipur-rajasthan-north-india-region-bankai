@@ -122,9 +122,16 @@ class IncidentModel(Base):
     estimated_flow_loss_lpm = Column(Float, nullable=False, default=0.0)
     estimated_volume_loss_liters = Column(Float, nullable=False, default=0.0)
     evidence = Column(JSON, nullable=True)
-    responsive_sensors = Column(JSON, nullable=True)
     candidate_segments = Column(JSON, nullable=True)
+    responsive_sensors = Column(JSON, nullable=True)
+    acknowledged_at = Column(DateTime, nullable=True)
+    resolved_at = Column(DateTime, nullable=True)
+    peak_raw_adc = Column(Integer, nullable=True)
+    peak_pressure_equivalent = Column(Float, nullable=True)
+    source = Column(String, nullable=True, default="LIVE HARDWARE")
     disclaimer = Column(Text, nullable=True)
+
+
 
 
 class GovernmentDatasetModel(Base):

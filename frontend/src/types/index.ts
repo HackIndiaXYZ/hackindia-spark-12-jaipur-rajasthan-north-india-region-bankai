@@ -28,6 +28,11 @@ export interface Incident {
   evidence: string[];
   observability_score: number;
   disclaimer: string;
+  acknowledged_at?: string | null;
+  resolved_at?: string | null;
+  peak_raw_adc?: number | null;
+  peak_pressure_equivalent?: number | null;
+  source?: string | null;
 }
 
 export interface Zone {

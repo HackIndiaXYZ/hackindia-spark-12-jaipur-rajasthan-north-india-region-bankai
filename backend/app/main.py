@@ -8,6 +8,11 @@ from app.api.routes import api_router
 from app.db.database import init_db
 
 
+try:
+    init_db()
+except Exception as _e:
+    pass
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Initializing AquaSentinel backend database tables...")

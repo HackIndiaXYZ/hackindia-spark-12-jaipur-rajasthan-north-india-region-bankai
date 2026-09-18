@@ -5,8 +5,12 @@ import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { NetworkTopologyMap } from "@/components/network/NetworkTopologyMap";
 import { AIAnalysisPanel } from "@/components/incidents/AIAnalysisPanel";
+import { IncidentHistoryPanel } from "@/components/incidents/IncidentHistoryPanel";
 import { useDemo } from "@/context/DemoContext";
+
+import { ESP32LivePanel } from "@/components/hardware/ESP32LivePanel";
 import { CANONICAL_TOPOLOGY } from "@/lib/demo/demoData";
+
 import {
   Activity,
   AlertTriangle,
@@ -31,8 +35,11 @@ export default function DashboardPage() {
     incidents,
     acknowledgeIncident,
     resolveIncident,
-    isDemoMode
+    isDemoMode,
+    isHardwareLive,
+    hardwareState
   } = useDemo();
+
 
   const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
   const [selectedSensor, setSelectedSensor] = useState<string | null>(null);
@@ -47,14 +54,24 @@ export default function DashboardPage() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <h1 className="text-xl font-bold text-white tracking-tight">Operational Command Console</h1>
-              <span className="text-[10px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded font-mono">
-                LIVE DEMO CONTROL
-              </span>
+              {isHardwareLive ? (
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded font-mono font-bold animate-pulse flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                  LIVE HARDWARE MODE (ESP32)
+                </span>
+              ) : (
+                <span className="text-[10px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded font-mono">
+                  LIVE DEMO CONTROL
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-400">
-              Real-time water pipeline telemetry, topology localization, simulated observability & false alarm intelligence
+              {isHardwareLive
+                ? "Physical ESP32 hardware telemetry actively driving anomaly detection & topology localization"
+                : "Real-time water pipeline telemetry, topology localization, simulated observability & false alarm intelligence"}
             </p>
           </div>
+
 
           {/* Quick Scenario Trigger Selector */}
           <div className="flex items-center gap-2 bg-[#0b0f19] p-1.5 rounded-lg border border-slate-800">
@@ -163,7 +180,11 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* ESP32 LIVE HARDWARE TELEMETRY PANEL */}
+        <ESP32LivePanel />
+
         {/* MAIN MIDDLE SECTION: NETWORK TOPOLOGY MAP & INCIDENT SIDEBAR */}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left 2 Columns: Live Network Topology Map (Centerpiece Visualization) */}
           <div className="lg:col-span-2 space-y-4">
@@ -341,13 +362,23 @@ export default function DashboardPage() {
 
         {/* BOTTOM SECTION: AI INCIDENT ANALYSIS PANEL */}
         <AIAnalysisPanel
+          incidentId={activeIncident?.incident_id || `INC-${scenario.toUpperCase()}`}
           whyDetected={activeState.aiAnalysis.whyDetected}
           recommendedActions={activeState.aiAnalysis.recommendedActions}
           confidenceNote={activeState.aiAnalysis.confidenceNote}
           limitations={activeState.aiAnalysis.limitations}
           isSensorFault={scenario === "sensor_fault"}
         />
+
+        {/* PERSISTENT INCIDENT HISTORY & AUDIT LOG */}
+        <IncidentHistoryPanel
+          incidents={incidents}
+          onAcknowledge={acknowledgeIncident}
+          onResolve={resolveIncident}
+          isHardwareAlertActive={isHardwareLive && hardwareState.telemetry?.status === "ALERT"}
+        />
       </div>
     </AppShell>
   );
 }
+

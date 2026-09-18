@@ -32,7 +32,6 @@ export const AIAnalysisPanel: React.FC<AIAnalysisPanelProps> = ({
 
   // Sync props if initial props change
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (initialWhy) setWhyDetected(initialWhy);
     if (initialActions) setRecommendedActions(initialActions);
     if (initialConfidence) setConfidenceNote(initialConfidence);
@@ -57,6 +56,12 @@ export const AIAnalysisPanel: React.FC<AIAnalysisPanelProps> = ({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (incidentId) {
+      fetchAIAnalysis();
+    }
+  }, [incidentId]);
 
   return (
     <div className="bg-[#0f172a] border border-cyan-500/30 rounded-xl p-5 shadow-lg relative overflow-hidden">
