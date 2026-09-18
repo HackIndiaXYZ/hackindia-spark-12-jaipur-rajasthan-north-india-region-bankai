@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { AlarmBanner } from "./AlarmBanner";
+import { useAlarm } from "@/lib/alarm/useAlarm";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -20,7 +22,8 @@ import { ScenarioType } from "@/types";
 
 export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathname = usePathname();
-  const { scenario, setScenario, isBackendLive, isDemoMode, setIsDemoMode } = useDemo();
+  const { scenario, setScenario, isBackendLive, isDemoMode, setIsDemoMode, incidents } = useDemo();
+  const { isAlarming, criticalIncidents, stopAlarm } = useAlarm(incidents);
   const [utcTime, setUtcTime] = useState<string>("");
 
   useEffect(() => {
@@ -174,6 +177,11 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
             </div>
           </div>
         </header>
+
+        {/* Critical Incident Alarm Banner */}
+        {isAlarming && (
+          <AlarmBanner incidents={criticalIncidents} onStop={stopAlarm} />
+        )}
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto bg-[#0b0f19]">{children}</main>
