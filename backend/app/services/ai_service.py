@@ -117,18 +117,19 @@ STRICT INSTRUCTIONS:
                 )
             )
 
-            if res.text:
+            if res and hasattr(res, "text") and res.text:
                 parsed_json = json.loads(res.text)
                 validated_result = AIAnalysisResult(**parsed_json)
                 return AIAnalysisResponse(
                     incident_id=incident_id,
                     analysis=validated_result,
-                    provider="gemini"
+                    provider="gemini-2.5-flash"
                 )
         except Exception as err:
-            logger.warning(f"Failed to generate structured Gemini response: {err}")
+            logger.warning(f"[GEMINI] Failed or timed out generating structured Gemini response: {err}. Using deterministic fallback.")
 
         return None
+
 
     def _generate_fallback_analysis(self, data: Dict[str, Any]) -> AIAnalysisResponse:
         """Generates a deterministic fallback analysis grounded entirely in existing AquaSentinel facts."""
