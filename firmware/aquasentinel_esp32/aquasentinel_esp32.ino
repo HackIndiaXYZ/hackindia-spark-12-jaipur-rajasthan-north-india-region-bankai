@@ -1,15 +1,3 @@
-/*
-  AquaSentinel ESP32 FSR402 Hardware Telemetry Firmware
-  -----------------------------------------------------
-  Hardware:
-  - FSR402: one side to 3.3V, other side to GPIO34 + 10k resistor to GND
-  - Buzzer: VCC to 3.3V, GND to GND, signal to GPIO32
-
-  Serial:
-  - 115200 baud
-  - newline-delimited JSON
-*/
-
 #include <Arduino.h>
 
 const int FSR_PIN = 34;
@@ -40,11 +28,15 @@ void loop() {
 
   int rawValue = analogRead(FSR_PIN);
 
+  // Demo-only pressure-equivalent value.
+  // This is NOT a calibrated PSI measurement.
   float pressureEquivalent =
       map(rawValue, 0, 4095, 0, 1000) / 10.0;
 
   bool isAlert = (rawValue >= ALERT_THRESHOLD);
-  const char* status = isAlert ? "ALERT" : "NORMAL";
+
+  const char* status =
+      isAlert ? "ALERT" : "NORMAL";
 
   // Physical buzzer
   if (isAlert) {
@@ -53,8 +45,9 @@ void loop() {
     noTone(BUZZER_PIN);
   }
 
-  // Send telemetry every 500 ms
+  // Send telemetry over USB Serial
   if (currentMillis - lastTelemetryTime >= TELEMETRY_INTERVAL_MS) {
+
     lastTelemetryTime = currentMillis;
 
     Serial.print("{\"device_id\":\"");

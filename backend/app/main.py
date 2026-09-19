@@ -34,14 +34,18 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS setup for external frontend (e.g. Next.js running on port 3000)
+# CORS setup for external frontend (Vercel production & local dev)
+raw_origins = [o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()] if settings.CORS_ORIGINS else ["*"]
+allow_origins = ["*"] if "*" in raw_origins or not raw_origins else raw_origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 

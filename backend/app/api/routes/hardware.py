@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone
 from typing import Optional, Dict, Any
@@ -21,10 +21,35 @@ _latest_derived_flow: Optional[float] = None
 _active_hardware_incident_id: Optional[str] = None
 
 
-@router.post("/telemetry", response_model=HardwareStateResponse)
-async def receive_hardware_telemetry(payload: ESP32TelemetryPayload, db: Session = Depends(get_db)):
+def verify_hardware_token(
+    x_hardware_token: Optional[str] = Header(None, alias="X-Hardware-Token"),
+    authorization: Optional[str] = Header(None)
+):
     """
-    Ingest ESP32 hardware telemetry from serial bridge.
+    Verify optional hardware ingest token if configured on the backend.
+    """
+    if not settings.HARDWARE_INGEST_TOKEN:
+        return
+
+    provided_token = x_hardware_token
+    if not provided_token and authorization:
+        if authorization.startswith("Bearer "):
+            provided_token = authorization[7:].strip()
+        else:
+            provided_token = authorization.strip()
+
+    if provided_token != settings.HARDWARE_INGEST_TOKEN:
+        raise HTTPException(status_code=401, detail="Invalid or missing hardware ingest token")
+
+
+@router.post("/telemetry", response_model=HardwareStateResponse)
+async def receive_hardware_telemetry(
+    payload: ESP32TelemetryPayload,
+    db: Session = Depends(get_db),
+    _: None = Depends(verify_hardware_token)
+):
+    """
+    Ingest ESP32 hardware telemetry from serial bridge (local or remote HTTPS).
     Maps FSR402 prototype sensor input (pressure_equivalent) into AquaSentinel pipeline.
     Creates or updates a persistent IncidentModel in SQLite DB while alert remains active.
     Resets active event tracking when sensor returns to NORMAL so future threshold crossings generate a NEW incident.
@@ -149,7 +174,7 @@ async def get_hardware_status():
     """
     Get latest ESP32 hardware connection state and telemetry.
     State is LIVE HARDWARE if telemetry was received within ESP32_STALE_THRESHOLD_SEC,
-    DISCONNECTED if stale, or NO_DATA if never received.
+    DISCONNECTED if stale, or SIMULATION if no telemetry has been ingested.
     """
     return get_hardware_status_internal()
 
@@ -169,8 +194,10 @@ def get_hardware_status_internal() -> HardwareStateResponse:
     elapsed_sec = time.time() - _last_received_time
     if elapsed_sec > settings.ESP32_STALE_THRESHOLD_SEC:
         connection_state = "DISCONNECTED"
+        incident_dict = None
     else:
         connection_state = "LIVE HARDWARE"
+        incident_dict = _latest_incident_dict
 
     iso_timestamp = datetime.fromtimestamp(_last_received_time, timezone.utc).isoformat()
 
@@ -178,6 +205,7 @@ def get_hardware_status_internal() -> HardwareStateResponse:
         connection_state=connection_state,
         last_received_at=iso_timestamp,
         telemetry=_latest_telemetry,
-        derived_flow_lpm=_latest_derived_flow,
-        pipeline_incident=_latest_incident_dict
+        derived_flow_lpm=_latest_derived_flow if connection_state == "LIVE HARDWARE" else None,
+        pipeline_incident=incident_dict
     )
+

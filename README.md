@@ -112,19 +112,65 @@ FSR402 Force ➔ ESP32 GPIO34 ➔ USB Serial JSON ➔ esp32_bridge.py ➔ FastAP
 
 ---
 
-## ⚡ Live ESP32 Mode
+## ⚡ Live ESP32 Mode & Remote Laptop Hardware Connectivity
 
-AquaSentinel supports zero-internet local hardware operation tailored specifically for hackathon environments.
+AquaSentinel supports zero-internet local hardware operation as well as cloud-connected hardware telemetry from any user's laptop.
 
 - **USB Serial Connection**: The ESP32 connects directly to the operator's laptop via standard micro-USB or USB-C cable.
-- **No Wi-Fi Dependency**: The ESP32 does not require college/event Wi-Fi credentials or internet access to deliver telemetry.
-- **Local Bridge**: `esp32_bridge.py` reads serial JSON packets from the USB COM port and forwards HTTP POST requests to the local FastAPI backend (`http://localhost:8000/api/hardware/telemetry`).
-- **Flexible Port Configuration**: The default COM port can be customized via environment variable `ESP32_SERIAL_PORT`.
+- **No Wi-Fi Dependency on ESP32**: The ESP32 communicates over USB serial with the laptop bridge; it does not require college/event Wi-Fi credentials or internet access itself.
+- **Local & Remote API Modes**: `esp32_bridge.py` reads serial JSON packets from the USB COM port and forwards HTTP/HTTPS POST requests to the backend (either local FastAPI or live Render cloud backend).
+- **Flexible Port & Target Configuration**: The serial port and target API base URL can be customized via environment variables.
 
-```text
-ESP32 Dev Module ➔ USB Cable ➔ COM15 (Example) ➔ esp32_bridge.py ➔ http://localhost:8000 ➔ AquaSentinel Dashboard
-```
-*Note: `COM15` is an example Windows serial port designation from the local dev environment and is dynamically autodetected or overridden via `ESP32_SERIAL_PORT=COM15`.*
+---
+
+## 💻 Using AquaSentinel with ESP32 from Any Laptop
+
+Any user can plug an ESP32 into their laptop via USB and stream real-time force sensor telemetry directly to the shared production Render API and Vercel Control Room.
+
+### Step-by-Step Setup:
+
+1. **Open Vercel Control Room**:
+   Navigate to [`https://aquasentinel-rouge.vercel.app`](https://aquasentinel-rouge.vercel.app) on any web browser.
+
+2. **Connect ESP32 via USB**:
+   Plug your ESP32 Dev Module into your laptop via USB cable.
+
+3. **Configure & Run Local Telemetry Bridge**:
+   Open a terminal on your laptop and set your local serial COM port and target Render API URL:
+
+   **Windows (PowerShell)**:
+   ```powershell
+   cd "backend"
+   $env:ESP32_SERIAL_PORT="COM15"   # Replace with your laptop's COM port (e.g. COM3, COM4)
+   $env:AQUASENTINEL_API_BASE_URL="https://aquasentinel-api-r00y.onrender.com"
+   # Optional: if backend authentication is enabled
+   $env:AQUASENTINEL_HARDWARE_TOKEN="YOUR_INGEST_TOKEN"
+   python esp32_bridge.py
+   ```
+
+   **Linux / macOS (Bash)**:
+   ```bash
+   cd backend
+   export ESP32_SERIAL_PORT="/dev/ttyUSB0"   # Or /dev/ttyACM0
+   export AQUASENTINEL_API_BASE_URL="https://aquasentinel-api-r00y.onrender.com"
+   # Optional: if backend authentication is enabled
+   export AQUASENTINEL_HARDWARE_TOKEN="YOUR_INGEST_TOKEN"
+   python esp32_bridge.py
+   ```
+
+4. **Observe Shared Cloud Dashboard**:
+   - The bridge logs telemetry packets sent over HTTPS to Render (`[BRIDGE] Telemetry sent: raw_value=..., status=ALERT, http_code=200`).
+   - The shared Vercel dashboard automatically updates to **`LIVE HARDWARE`**.
+   - Applying physical force on the FSR402 triggers instant physical buzzer alert (GPIO32), web control room alarm, pipeline edge `B2-B3` red pulse, active incident creation, and grounded Gemini AI analysis.
+   - Releasing the force returns the dashboard to `NORMAL` state while retaining historical incidents in the persistent database.
+
+> [!NOTE]
+> **Architecture Clarification**:
+> - Vercel hosts the Next.js control room frontend.
+> - Render hosts the central FastAPI intelligence API and persistent database.
+> - The local python bridge (`esp32_bridge.py`) runs on your laptop to read USB serial telemetry.
+> - Render and Vercel never access your laptop's USB hardware directly; telemetry is transmitted securely over HTTPS REST APIs.
+
 
 ---
 
@@ -439,7 +485,8 @@ AquaSentinel supports both cloud web deployment and local hackathon hardware ope
 
 The AquaSentinel release has been fully validated through backend unit/integration test suites, frontend TypeScript builds, and physical ESP32 runtime checks:
 
-- **Backend Pytest Suite**: `69/69 passed` (100% pass rate covering anomaly detection, NetworkX localization, persistent incident SQLite lifecycle, government dataset parsers, hardware telemetry routes, and AI analysis grounding).
+- **Backend Pytest Suite**: `74/74 passed` (100% pass rate covering anomaly detection, NetworkX localization, persistent incident SQLite lifecycle, government dataset parsers, hardware telemetry routes, remote HTTPS bridge ingestion, stale state detection, token authentication, and AI analysis grounding).
+
 - **Frontend Build**: Successful Production Build (`npm run build`) with **0 TypeScript errors** and 0 ESLint warnings.
 - **FastAPI API**: Verified operational on `http://127.0.0.1:8000`.
 - **ESP32 Bridge**: Verified serial connection on `COM15` streaming 500 ms JSON telemetry packets.

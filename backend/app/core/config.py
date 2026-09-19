@@ -8,12 +8,18 @@ DEFAULT_DB_PATH = os.path.join(BASE_DIR, "aquasentinel.db").replace("\\", "/")
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "AquaSentinel Water Monitoring API"
-    VERSION: str = "1.0.0"
+    VERSION: str = "1.1.0"
     API_V1_STR: str = "/api"
     DEBUG: bool = True
 
     # Database
     DATABASE_URL: str = f"sqlite:///{DEFAULT_DB_PATH}"
+
+    # CORS Origins (Comma-separated or wildcard)
+    CORS_ORIGINS: str = "https://aquasentinel-rouge.vercel.app,http://localhost:3000,http://127.0.0.1:3000"
+
+    # Ingestion Security (Optional hardware ingest token)
+    HARDWARE_INGEST_TOKEN: Optional[str] = None
 
     # External APIs
     NWIC_API_KEY: Optional[str] = None
@@ -37,7 +43,7 @@ class Settings(BaseSettings):
     ESP32_ALERT_THRESHOLD: int = 50
     ESP32_PRESSURE_MIN: float = 0.0
     ESP32_PRESSURE_MAX: float = 5.0
-    ESP32_STALE_THRESHOLD_SEC: float = 5.0
+    ESP32_STALE_THRESHOLD_SEC: float = 10.0
 
 
     model_config = SettingsConfigDict(
@@ -48,4 +54,5 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
 
