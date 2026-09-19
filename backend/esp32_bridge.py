@@ -134,9 +134,10 @@ def run_bridge():
             print(f"[BRIDGE] Failed to open {port_name}: {e}")
             print("[BRIDGE] Re-scanning in 3 seconds...")
             time.sleep(3)
-            except Exception as e:
+        except Exception as e:
             print(f"[BRIDGE] Unexpected error: {e}")
             time.sleep(3)
+
 
 if __name__ == "__main__":
     run_bridge()

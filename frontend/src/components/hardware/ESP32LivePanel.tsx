@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Cpu, AlertTriangle, CheckCircle, WifiOff, Activity, Gauge, Zap } from "lucide-react";
+import { getApiEndpoint } from "@/lib/api/client";
 
 interface TelemetryPayload {
   device_id: string;
@@ -37,8 +38,7 @@ export const ESP32LivePanel: React.FC = () => {
   useEffect(() => {
     const fetchHardwareStatus = async () => {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
-        const res = await fetch(`${baseUrl}/api/hardware/latest`, { cache: "no-store" });
+        const res = await fetch(getApiEndpoint("/hardware/latest"), { cache: "no-store" });
         if (res.ok) {
           const data = await res.json();
           setHardwareState(data);

@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { ScenarioType, Incident } from "@/types";
 import { SCENARIO_STATES, ScenarioDemoState, generateScenarioReadings } from "@/lib/demo/demoData";
-import { checkBackendHealth, listIncidents, updateIncidentStatus, analyzeTelemetry } from "@/lib/api/client";
+import { checkBackendHealth, listIncidents, updateIncidentStatus, analyzeTelemetry, getApiEndpoint } from "@/lib/api/client";
 
 interface HardwareTelemetryPayload {
   device_id: string;
@@ -44,7 +44,7 @@ const DemoContext = createContext<DemoContextType | undefined>(undefined);
 export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [scenario, setScenarioState] = useState<ScenarioType>("normal");
   const [isBackendLive, setIsBackendLive] = useState<boolean>(false);
-  const [isDemoMode, setIsDemoMode] = useState<boolean>(true);
+  const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
   const [demoState, setDemoState] = useState<ScenarioDemoState>(SCENARIO_STATES["normal"]);
   const [backendIncidents, setBackendIncidents] = useState<Incident[]>([]);
 
@@ -85,8 +85,7 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const pollHardware = async () => {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
-        const res = await fetch(`${baseUrl}/api/hardware/latest`, { cache: "no-store" });
+        const res = await fetch(getApiEndpoint("/hardware/latest"), { cache: "no-store" });
         if (res.ok) {
           const data = await res.json();
           setHardwareState(data);
@@ -103,6 +102,7 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const hwInterval = setInterval(pollHardware, 500); // 500ms polling for live hardware reactivity
     return () => clearInterval(hwInterval);
   }, []);
+
 
   useEffect(() => {
     refreshBackendData();

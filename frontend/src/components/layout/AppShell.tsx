@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useDemo } from "@/context/DemoContext";
 import { ScenarioType } from "@/types";
+import { getApiHostLabel } from "@/lib/api/client";
 
 export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathname = usePathname();
@@ -162,7 +163,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
               <Server className="w-3.5 h-3.5 text-slate-400" />
               <span className="text-slate-400">Backend API:</span>
               {isBackendLive ? (
-                <span className="text-emerald-400 font-medium">CONNECTED (Port 8000)</span>
+                <span className="text-emerald-400 font-medium">CONNECTED ({getApiHostLabel()})</span>
               ) : (
                 <span className="text-amber-400 font-medium">OFFLINE (Using Demo State)</span>
               )}
